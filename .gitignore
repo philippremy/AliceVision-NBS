@@ -1,0 +1,21 @@
+# IDE folders
+.idea
+.zed
+.vscode
+
+# Build folders and artifacts
+build*
+
+*.o
+*.a
+*.dylib
+*.framework
+*.so
+*.lib
+*.dll
+
+# CLion/IntelliJ CMake folders
+cmake-build-*
+
+# maOS mdstore files
+*.DS_Store

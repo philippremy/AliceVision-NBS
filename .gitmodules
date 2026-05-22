@@ -1,0 +1,12 @@
+[submodule "third-party/zlib"]
+	path = third-party/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "third-party/llvm-project"]
+	path = third-party/llvm-project
+	url = https://github.com/llvm/llvm-project.git
+[submodule "third-party/LEMON"]
+	path = third-party/LEMON
+	url = https://github.com/philippremy/lemon.git
+[submodule "third-party/libE57Format"]
+	path = third-party/libE57Format
+	url = https://github.com/asmaloney/libE57Format.git
