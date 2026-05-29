@@ -10,3 +10,36 @@
 [submodule "third-party/libE57Format"]
 	path = third-party/libE57Format
 	url = https://github.com/asmaloney/libE57Format.git
+[submodule "third-party/boost"]
+	path = third-party/boost
+	url = https://github.com/boostorg/boost.git
+[submodule "third-party/nanoflann"]
+	path = third-party/nanoflann
+	url = https://github.com/jlblancoc/nanoflann.git
+[submodule "third-party/libexpat"]
+	path = third-party/libexpat
+	url = https://github.com/libexpat/libexpat.git
+[submodule "third-party/libdeflate"]
+	path = third-party/libdeflate
+	url = https://github.com/ebiggers/libdeflate.git
+[submodule "third-party/OpenJPH"]
+	path = third-party/OpenJPH
+	url = https://github.com/aous72/OpenJPH.git
+[submodule "third-party/Imath"]
+	path = third-party/Imath
+	url = https://github.com/AcademySoftwareFoundation/Imath.git
+[submodule "third-party/oneTBB"]
+	path = third-party/oneTBB
+	url = https://github.com/uxlfoundation/oneTBB.git
+[submodule "third-party/openexr"]
+	path = third-party/openexr
+	url = https://github.com/AcademySoftwareFoundation/openexr.git
+[submodule "third-party/OpenColorIO"]
+	path = third-party/OpenColorIO
+	url = https://github.com/AcademySoftwareFoundation/OpenColorIO.git
+[submodule "third-party/eigen"]
+	path = third-party/eigen
+	url = https://gitlab.com/libeigen/eigen.git
+[submodule "third-party/lz4"]
+	path = third-party/lz4
+	url = https://github.com/lz4/lz4.git

@@ -21,7 +21,7 @@ Imported targets
 
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
-.. variable:: LZ4::LZ4
+.. variable:: lz4::lz4
 
   Imported target for using the LZ4 library, if found.
 
@@ -102,28 +102,28 @@ set(LZ4_INCLUDE_DIRS ${LZ4_INCLUDE_DIR})
 
 ### Import targets ############################################################
 if(LZ4_FOUND)
-  if(NOT TARGET LZ4::LZ4)
-    add_library(LZ4::LZ4 UNKNOWN IMPORTED)
-    set_target_properties(LZ4::LZ4 PROPERTIES
+  if(NOT TARGET lz4::lz4)
+    add_library(lz4::lz4 UNKNOWN IMPORTED)
+    set_target_properties(lz4::lz4 PROPERTIES
         IMPORTED_LINK_INTERFACE_LANGUAGES "C"
         INTERFACE_INCLUDE_DIRECTORIES "${LZ4_INCLUDE_DIR}")
 
     if(LZ4_LIBRARY_RELEASE)
-      set_property(TARGET LZ4::LZ4 APPEND PROPERTY
+      set_property(TARGET lz4::lz4 APPEND PROPERTY
           IMPORTED_CONFIGURATIONS RELEASE)
-      set_target_properties(LZ4::LZ4 PROPERTIES
+      set_target_properties(lz4::lz4 PROPERTIES
           IMPORTED_LOCATION_RELEASE "${LZ4_LIBRARY_RELEASE}")
     endif()
 
     if(LZ4_LIBRARY_DEBUG)
-      set_property(TARGET LZ4::LZ4 APPEND PROPERTY
+      set_property(TARGET lz4::lz4 APPEND PROPERTY
           IMPORTED_CONFIGURATIONS DEBUG)
-      set_target_properties(LZ4::LZ4 PROPERTIES
+      set_target_properties(lz4::lz4 PROPERTIES
           IMPORTED_LOCATION_DEBUG "${LZ4_LIBRARY_DEBUG}")
     endif()
 
     if(NOT LZ4_LIBRARY_RELEASE AND NOT LZ4_LIBRARY_DEBUG)
-      set_property(TARGET LZ4::LZ4 APPEND PROPERTY
+      set_property(TARGET lz4::lz4 APPEND PROPERTY
           IMPORTED_LOCATION "${LZ4_LIBRARY}")
     endif()
   endif()

@@ -38,293 +38,7 @@
 #                          provided packages).
 # =============================================================================
 
-# =============================================================================
-# A helper macro which temporarily adds certain prefix paths to allow CMake to
-# find OpenMP correctly on macOS. The equivalent revert function must be called
-# to ensure that the paths are not messed-up afterwards.
-# For now we use the first version of OpenMP found (Homebrew > MacPorts),
-# so it might be somewhat unpredictable if package-managers install multiple
-# versions of OpenMP. Nix is currently unsupported.
-# =============================================================================
-macro(alicevision_push_appleclang_openmp)
-
-  if(APPLE)
-
-    set(AV_KNOWN_PACKAGE_MANAGER_PATHS
-      "/opt/homebrew/Cellar/libomp"   # Apple Silicon Mac Homebrew (standalone OpenMP)
-      "/usr/local/Cellar/libomp"      # Intel Mac Homebrew (standalone OpenMP)
-      "/opt/local"                    # MacPorts (standalone)
-    )
-
-    # Whether the pop() function must remove a directory eventually
-    set(AV_MUST_POP_PREFIX_PATH FALSE)
-
-    foreach(AV_KNOWN_PACKAGE_MANAGER_PATH IN LISTS AV_KNOWN_PACKAGE_MANAGER_PATHS)
-
-      # Skip if the prefix does not exist
-      if(NOT EXISTS "${AV_KNOWN_PACKAGE_MANAGER_PATH}")
-        message(TRACE "[alicevision_push_appleclang_openmp] Skipping non-existent prefix: ${AV_KNOWN_PACKAGE_MANAGER_PATH}")
-        continue()
-      endif()
-
-      # Check if there is a lib and an include folder present directly
-      if((EXISTS "${AV_KNOWN_PACKAGE_MANAGER_PATH}/lib/libomp.dylib"
-          OR EXISTS "${AV_KNOWN_PACKAGE_MANAGER_PATH}/lib/libomp.a")
-          AND EXISTS "${AV_KNOWN_PACKAGE_MANAGER_PATH}/include/omp.h")
-        list(APPEND CMAKE_PREFIX_PATH ${AV_KNOWN_PACKAGE_MANAGER_PATH})
-        set(AV_MUST_POP_PREFIX_PATH TRUE)
-        message(TRACE "[alicevision_push_appleclang_openmp] Found OpenMP lib/include prefix: ${AV_KNOWN_PACKAGE_MANAGER_PATH}")
-        break()
-      endif()
-
-      # If the above did not succeed, we will recursively glob files for a file
-      # called omp.h. If one is found, we check if there is a accompanying .dylib
-      # or .a file for the library.
-      # If that is the case, the parent folder containing them is added to the
-      # CMake prefix path
-      message(TRACE "[alicevision_push_appleclang_openmp] Globbing known package manager prefix: ${AV_KNOWN_PACKAGE_MANAGER_PATH}")
-      file(GLOB_RECURSE AV_OMP_H_FILES LIST_DIRECTORIES FALSE "${AV_KNOWN_PACKAGE_MANAGER_PATH}/**/omp.h")
-      if(AV_OMP_H_FILES)
-        foreach(AV_OMP_H_FILE_TEMP "${AV_OMP_H_FILES}")
-          set(AV_OMP_H_FILE ${AV_OMP_H_FILE_TEMP})
-          break()
-        endforeach()
-        if(NOT AV_OMP_H_FILE)
-          continue()
-        endif()
-        cmake_path(GET AV_OMP_H_FILE PARENT_PATH AV_OMP_H_DIR)
-        cmake_path(GET AV_OMP_H_DIR PARENT_PATH AV_OMP_PREFIX)
-        message(TRACE "[alicevision_push_appleclang_openmp] Found an omp.h in: ${AV_OMP_H_DIR}")
-        message(TRACE "[alicevision_push_appleclang_openmp] Checking for libomp.[a|dylib]: ${AV_OMP_PREFIX}")
-        if(EXISTS "${AV_OMP_PREFIX}/lib/libomp.a" OR EXISTS "${AV_OMP_PREFIX}/lib/libomp.dylib")
-          list(APPEND CMAKE_PREFIX_PATH ${AV_OMP_PREFIX})
-          set(AV_MUST_POP_PREFIX_PATH TRUE)
-          message(TRACE "[alicevision_push_appleclang_openmp] Found OpenMP lib/include prefix: ${AV_OMP_PREFIX}")
-          break()
-        endif()
-      endif()
-
-    endforeach()
-
-    # Inform the user we prepended something
-    if(AV_MUST_POP_PREFIX_PATH)
-      list(LENGTH CMAKE_PREFIX_PATH AV_PREFIX_PATH_LEN)
-      if(AV_PREFIX_PATH_LEN GREATER 0)
-        math(EXPR AV_PREFIX_PATH_IDX "${AV_PREFIX_PATH_LEN}-1")
-        list(GET CMAKE_PREFIX_PATH ${AV_PREFIX_PATH_IDX} AV_TEMP_PREFIX_PATH)
-        if(AV_TEMP_PREFIX_PATH)
-          message(VERBOSE "Added temporary prefix ${AV_TEMP_PREFIX_PATH} to CMAKE_PREFIX_PATH to allow CMake to find a package-manager OpenMP (macOS workaround).")
-        endif()
-      endif()
-    endif()
-
-  endif()
-
-endmacro()
-
-# =============================================================================
-# The equivalent revert function for alicevision_push_appleclang_openmp()
-# =============================================================================
-macro(alicevision_pop_appleclang_openmp)
-
-  if(APPLE)
-    # Only remove if the push function added something
-    if(AV_MUST_POP_PREFIX_PATH)
-      list(LENGTH CMAKE_PREFIX_PATH AV_PREFIX_PATH_LEN)
-      if(AV_PREFIX_PATH_LEN GREATER 0)
-        math(EXPR AV_PREFIX_PATH_IDX "${AV_PREFIX_PATH_LEN}-1")
-        list(GET CMAKE_PREFIX_PATH ${AV_PREFIX_PATH_IDX} AV_TEMP_PREFIX_PATH)
-      endif()
-      list(POP_BACK CMAKE_PREFIX_PATH)
-      if(AV_TEMP_PREFIX_PATH)
-        message(VERBOSE "Popped temporary prefix ${AV_TEMP_PREFIX_PATH} from CMAKE_PREFIX_PATH (macOS workaround).")
-      endif()
-    endif()
-  endif()
-
-endmacro()
-
-# =============================================================================
-# A helper function to ensure a dependency is available at the end of the call
-#
-# Call signature:
-# alicevision_ensure_dependency(<DEPENDENCY_NAME>
-#   [ALTERNATIVE_PACKAGE_NAMES <PACKAGE_NAME>...]
-#   [VERSION <VERSION>|<VERSION_RANGE>]
-#   [COMPONENTS <COMPONENTS...>]
-#   [ALLOW_CMAKE_MODULE]
-#   [LEGACY_SUPPORT_VERSION <VERSION>|<VERSION_RANGE>]
-# )
-# =============================================================================
-function(alicevision_ensure_dependency AV_DEP_NAME)
-
-  cmake_parse_arguments(AV_DEP
-    "ALLOW_CMAKE_MODULE;FORCE_FIND_PKG_VERSION"
-    "LEGACY_SUPPORT_VERSION;VERSION"
-    "COMPONENTS;ALTERNATIVE_PACKAGE_NAMES"
-    ${ARGN}
-  )
-
-  # There must at least be a dependency name
-  if(NOT DEFINED AV_DEP_NAME OR AV_DEP_NAME STREQUAL "")
-    message(FATAL_ERROR "Must provide a dependency name to alicevision_ensure_dependency!")
-  endif()
-
-  # Either we can look for all dependencies provided externally or the user
-  # explicitly opted in for this specific dependency
-  # Is forcibly overridden by ALICEVISION_FORCE_BUILD_<DEP_NAME>
-  if((ALICEVISION_ALLOW_SYSTEM_DEPENDENCIES
-     OR ALICEVISION_ALLOW_SYSTEM_${AV_DEP_NAME})
-     AND NOT ALICEVISION_FORCE_BUILD_${AV_DEP_NAME}
-  )
-
-    # Build the find_package() call
-    # We only use the main package name here!
-    set(${AV_DEP_NAME}_FIND_PKG_ARGS "${AV_DEP_NAME}")
-
-    # We want it to be quiet
-    if(NOT ALICEVISION_FIND_SYSTEM_DEPENDENCIES_VERBOSE)
-      list(APPEND ${AV_DEP_NAME}_FIND_PKG_ARGS "QUIET")
-    endif()
-
-    # Whether to allow CMake Find* modules
-    if(AV_DEP_ALLOW_CMAKE_MODULE)
-      # Nothing, module is allowed by default
-    else()
-      list(APPEND ${AV_DEP_NAME}_FIND_PKG_ARGS "CONFIG;NO_MODULE")
-    endif()
-
-    # We want it to be in global scope afterwards
-    list(APPEND ${AV_DEP_NAME}_FIND_PKG_ARGS "GLOBAL")
-
-    # Whether we need to append the components
-    if(DEFINED AV_DEP_COMPONENTS AND NOT AV_DEP_COMPONENTS STREQUAL "")
-      list(APPEND ${AV_DEP_NAME}_FIND_PKG_ARGS "COMPONENTS")
-      foreach(AV_DEP_COMPONENT IN LISTS AV_DEP_COMPONENTS)
-        list(APPEND ${AV_DEP_NAME}_FIND_PKG_ARGS "${AV_DEP_COMPONENT}")
-      endforeach()
-    endif()
-
-    # If there are alternative package names given, use these as well
-    if(DEFINED AV_DEP_ALTERNATIVE_PACKAGE_NAMES)
-      list(APPEND ${AV_DEP_NAME}_FIND_PKG_ARGS "NAMES")
-      # The main package name should be first
-      list(APPEND ${AV_DEP_NAME}_FIND_PKG_ARGS "${AV_DEP_NAME}")
-      list(APPEND ${AV_DEP_NAME}_FIND_PKG_ARGS "${AV_DEP_ALTERNATIVE_PACKAGE_NAMES}")
-    endif()
-
-    message(TRACE "[alicevision_ensure_dependency] Trying to find dependency externally with call: find_package(${${AV_DEP_NAME}_FIND_PKG_ARGS})")
-
-    # We want to disable CMake Warning (dev) about case mismatches unless the
-    # caller opted for a non-quiet search.
-    if(NOT ALICEVISION_FIND_SYSTEM_DEPENDENCIES_VERBOSE)
-      cmake_language(GET_MESSAGE_LOG_LEVEL AV_GLOBAL_LOG_LEVEL)
-      set(CMAKE_MESSAGE_LOG_LEVEL "ERROR" CACHE STRING "The CMake Message log level" FORCE)
-    endif()
-
-    # Execute the call
-    find_package(${${AV_DEP_NAME}_FIND_PKG_ARGS})
-
-    if(NOT ALICEVISION_FIND_SYSTEM_DEPENDENCIES_VERBOSE)
-      set(CMAKE_MESSAGE_LOG_LEVEL "${AV_GLOBAL_LOG_LEVEL}" CACHE STRING "The CMake Message log level" FORCE)
-    endif()
-
-    # Check if found, then we return early
-    # Maybe the <DEP_NAME>_FOUND variable expects to be all uppercase, so check
-    # for that as well
-    string(TOUPPER ${AV_DEP_NAME} AV_DEP_NAME_UPPERCASE)
-    if(${AV_DEP_NAME}_FOUND OR ${AV_DEP_NAME_UPPERCASE}_FOUND)
-      set(AV_DEP_ACTUAL_VERSION)
-      if(DEFINED ${AV_DEP_NAME}_VERSION)
-        set(AV_DEP_ACTUAL_VERSION ${${AV_DEP_NAME}_VERSION})
-      elseif(DEFINED ${AV_DEP_NAME_UPPERCASE}_VERSION)
-        set(AV_DEP_ACTUAL_VERSION ${${AV_DEP_NAME_UPPERCASE}_VERSION})
-      else()
-        # No version available, emit a warning if we needed one
-        if(DEFINED AV_DEP_VERSION)
-          message(WARNING "Found dependency ${AV_DEP_NAME} without a version number but required was at least ${AV_DEP_VERSION}. It might work, please check the versions and expect issues if the version does not match the requirement.")
-          message(STATUS "Found external ${AV_DEP_NAME}: N/A (version[s] ${AV_DEP_VERSION} supported)")
-          return()
-        else()
-          message(STATUS "Found external ${AV_DEP_NAME}: N/A (all versions supported)")
-          return()
-        endif()
-      endif()
-
-      # No version specified, all versions are accepted
-      if(NOT DEFINED AV_DEP_VERSION)
-        message(STATUS "Found external ${AV_DEP_NAME}: ${AV_DEP_ACTUAL_VERSION} (all versions supported)")
-        return()
-      endif()
-
-      # Ensure version compatibility explicitly
-      include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/CheckDependencyVersion.cmake)
-      alicevision_check_dependency_version(${AV_DEP_VERSION} ${AV_DEP_ACTUAL_VERSION} AV_DEP_VERSION_COMPATIBLE)
-      if(AV_DEP_VERSION_COMPATIBLE)
-        # Check if we are in a support version range, then emit a warning
-        if(DEFINED AV_DEP_LEGACY_SUPPORT_VERSION)
-          alicevision_check_dependency_version(${AV_DEP_LEGACY_SUPPORT_VERSION} ${AV_DEP_ACTUAL_VERSION} AV_DEP_VERSION_LEGACY_RANGE)
-          if(AV_DEP_VERSION_LEGACY_RANGE)
-            message(WARNING "Found external dependency ${AV_DEP_NAME} with legacy compatibility version ${AV_DEP_ACTUAL_VERSION}. Support is provided for backwards compatibility, other dependencies might require a newer version. Consider setting ${AV_DEP_NAME}_ROOT/${AV_DEP_NAME}_DIR if you have multiple versions installed and the wrong one is being found or update the dependency.")
-          endif()
-          message(STATUS "Found external ${AV_DEP_NAME}: ${AV_DEP_ACTUAL_VERSION} (version[s] ${AV_DEP_VERSION} supported, compat version[s] ${AV_DEP_LEGACY_SUPPORT_VERSION} supported)")
-          return()
-        else()
-          message(STATUS "Found external ${AV_DEP_NAME}: ${AV_DEP_ACTUAL_VERSION} (version[s] ${AV_DEP_VERSION} supported)")
-          return()
-        endif()
-      else()
-        # Version is not compatible
-        if(DEFINED AV_DEP_LEGACY_SUPPORT_VERSION)
-          message(STATUS "Found external ${AV_DEP_NAME}, but the version is not in range: ${AV_DEP_ACTUAL_VERSION} (version[s] ${AV_DEP_VERSION} supported, compat version[s] ${AV_DEP_LEGACY_SUPPORT_VERSION} supported)")
-        else()
-          message(STATUS "Found external ${AV_DEP_NAME}, but the version is not in range: ${AV_DEP_ACTUAL_VERSION} (version[s] ${AV_DEP_VERSION} supported)")
-        endif()
-      endif()
-
-    endif()
-
-  endif()
-
-  # Not found or no external package allowed
-  # We might be allowed to build it
-  if(ALICEVISION_BUILD_THIRD_PARTY OR ALICEVISION_FORCE_BUILD_${AV_DEP_NAME})
-    message(STATUS "Dependency ${AV_DEP_NAME} will be built from source.")
-    # Include the build helper file
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/Build_${AV_DEP_NAME}.cmake)
-
-    # We try to find it again (must be included by now) without any standard
-    # ways CMake provides. This should redirect to the pkgRedirects directory.
-    # If the <AV_DEP_NAME>_FOUND variable is still FALSE, there is some deeper
-    # issue which is likely a bug. Catch it early here.
-    find_package(${AV_DEP_NAME}
-        QUIET
-        CONFIG
-        NO_MODULE
-        NO_CMAKE_BUILDS_PATH
-        NO_CMAKE_ENVIRONMENT_PATH
-        NO_CMAKE_FIND_ROOT_PATH
-        NO_CMAKE_INSTALL_PREFIX
-        NO_CMAKE_PACKAGE_REGISTRY
-        NO_CMAKE_PATH
-        NO_CMAKE_SYSTEM_PACKAGE_REGISTRY
-        NO_CMAKE_SYSTEM_PATH
-        NO_DEFAULT_PATH
-        NO_PACKAGE_ROOT_PATH
-    )
-    if(NOT ${AV_DEP_NAME}_FOUND)
-      message(FATAL_ERROR "After adding ${AV_DEP_NAME} with FetchContent, a call to find_package() still leaves ${AV_DEP_NAME}_FOUND as FALSE. This is likely a bug!")
-    endif()
-
-    return()
-  endif()
-
-  # If we got here neither the external nor the embedded way were allowed
-  # This is quasi an unreachable scenario because there is no way to get
-  # the dependency now.
-  message(FATAL_ERROR "The dependency ${AV_DEP_NAME} cannot be resolved because it may not be found externally and not be built (unreachable dependency)!")
-
-endfunction()
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/EnsureDependency.cmake)
 
 # Skip installation of third-party projects unless the user opted-in
 # This applies to the current directory (third-party) and all subdirectories
@@ -393,13 +107,35 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/find")
 # "/Library/Frameworks/Mono.framework/Headers", which causes symbol mismatches
 set(CMAKE_FIND_FRAMEWORK LAST)
 
+# Apple provides many packages and libraries with Xcode, but they are pretty
+# much all way too old to be used. Disable finding there globally.
+if(CMAKE_CROSSCOMPILING OR (ALICEVISION_IGNORE_XCODE_PACKAGES AND APPLE))
+  # Remove all CMake system paths
+  set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH OFF)
+  set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
+  # For Apple, re-add package manager prefixes
+  if(NOT CMAKE_CROSSCOMPILING)
+    list(APPEND CMAKE_PREFIX_PATH
+      "/opt/homebrew"   # Apple Silicon Homebrew
+      "/usr/local"      # Intel Mac Homebrew
+      "/opt/local"      # MacPorts
+    )
+  endif()
+endif()
+
 # =============================================================================
 # zlib
 # (Version compatibility: AnyNewerVersion)
 #
+# NOTE:
+# OpenColorIO requires at least zlib 1.2.13, which is newer than any zlib
+# provided by Apple. I.e, the system zlib from Apple cannot be used.
+#
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(zlib
+alicevision_ensure_dependency(ZLIB
+    ALTERNATIVE_PACKAGE_NAMES ZLIB zlib
+    VERSION 1.2.13
     ALLOW_CMAKE_MODULE
 )
 
@@ -410,7 +146,7 @@ alicevision_ensure_dependency(zlib
 # Dependencies: None
 # =============================================================================
 alicevision_ensure_dependency(Boost
-    VERSION 1.74...<2
+    VERSION 1.74
     COMPONENTS
       atomic
       container
@@ -423,7 +159,6 @@ alicevision_ensure_dependency(Boost
       program_options
       regex
       serialization
-      system
       thread
       timer
       unit_test_framework
@@ -459,7 +194,7 @@ alicevision_pop_appleclang_openmp()
 # Dependencies: Threads
 # =============================================================================
 alicevision_ensure_dependency(nanoflann
-    VERSION 1.5.4...
+    VERSION 1.5.4
 )
 
 # =============================================================================
@@ -469,7 +204,7 @@ alicevision_ensure_dependency(nanoflann
 # Dependencies: None
 # =============================================================================
 alicevision_ensure_dependency(Expat
-    VERSION 2.4.8...<3
+    VERSION 2.4.8
 )
 
 # =============================================================================
@@ -490,11 +225,15 @@ alicevision_ensure_dependency(libdeflate)
 # change if other dependencies require a more specific version (range).
 # Must at least be 0.21.2 for OpenImageIO.
 #
+# FIXME:
+# We cannot specify a version requirement, because this excludes many versions
+# that are potentially compatible. If it is too old, some dependency might just
+# not use it. Unless CMake starts providing a way to just query the version, we
+# cannot do anything about it - except hard-erroring, which is not appropriate.
+#
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(openjph
-  VERSION 0.21.2...
-)
+alicevision_ensure_dependency(openjph)
 
 # =============================================================================
 # Imath
@@ -503,7 +242,7 @@ alicevision_ensure_dependency(openjph
 # Dependencies: None
 # =============================================================================
 alicevision_ensure_dependency(Imath
-    VERSION 3.1...<4
+    VERSION 3.1
 )
 
 # =============================================================================
@@ -518,14 +257,10 @@ alicevision_ensure_dependency(TBB)
 # OpenEXR
 # (Version compatibility: SameMajorVersion)
 #
-# NOTE:
-# We keep support for OpenEXR 2.5, but prefer OpenEXR 3, allow 2.5 to fail
-#
 # Dependencies: Imath, Threads (libdeflate, openjph, TBB)
 # =============================================================================
 alicevision_ensure_dependency(OpenEXR
-    VERSION 2.5...<=3
-    LEGACY_SUPPORT_VERSION 2.5
+    VERSION 3
 )
 
 # =============================================================================
@@ -539,7 +274,7 @@ alicevision_ensure_dependency(OpenEXR
 # Dependencies: Imath, zlib, minizip-ng, pystring, yaml-cpp, Expat
 # =============================================================================
 alicevision_ensure_dependency(OpenColorIO
-    VERSION 2.3...<3
+    VERSION 2.3
 )
 
 # =============================================================================
@@ -549,8 +284,9 @@ alicevision_ensure_dependency(OpenColorIO
 # Dependencies: None
 # =============================================================================
 alicevision_ensure_dependency(Eigen
-    ALTERNATIVE_PACKAGE_NAMES eigen Eigen3 eigen3
-    VERSION 3...<=5
+    ALTERNATIVE_PACKAGE_NAMES Eigen eigen Eigen3 eigen3
+    VERSION 5
+    LEGACY_SUPPORT_VERSION 3
 )
 
 # =============================================================================
@@ -574,9 +310,9 @@ alicevision_ensure_dependency(LZ4
 #
 # Dependencies: LZ4 (OpenMP, CUDA)
 # =============================================================================
-alicevision_ensure_dependency(flann
-  VERSION 1.8.4...<2
-)
+#alicevision_ensure_dependency(flann
+#  VERSION 1.8.4...<2
+#)
 
 # =============================================================================
 # (Open)BLAS/(Open)LAPACK
@@ -584,12 +320,12 @@ alicevision_ensure_dependency(flann
 #
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(BLAS
-    ALLOW_CMAKE_MODULE
-)
-alicevision_ensure_dependency(LAPACK
-    ALLOW_CMAKE_MODULE
-)
+#alicevision_ensure_dependency(BLAS
+#    ALLOW_CMAKE_MODULE
+#)
+#alicevision_ensure_dependency(LAPACK
+#    ALLOW_CMAKE_MODULE
+#)
 
 # =============================================================================
 # CoinUtils
@@ -597,10 +333,10 @@ alicevision_ensure_dependency(LAPACK
 #
 # Dependencies: BLAS
 # =============================================================================
-alicevision_ensure_dependency(CoinUtils
-    VERSION 2.9.3...<3
-    ALLOW_CMAKE_MODULE
-)
+#alicevision_ensure_dependency(CoinUtils
+#    VERSION 2.9.3...<3
+#    ALLOW_CMAKE_MODULE
+#)
 
 # =============================================================================
 # Osi
@@ -608,10 +344,10 @@ alicevision_ensure_dependency(CoinUtils
 #
 # Dependencies: CoinUtils
 # =============================================================================
-alicevision_ensure_dependency(Osi
-    VERSION ...<1
-    ALLOW_CMAKE_MODULE
-)
+#alicevision_ensure_dependency(Osi
+#    VERSION ...<1
+#    ALLOW_CMAKE_MODULE
+#)
 
 # =============================================================================
 # Clp
@@ -619,10 +355,10 @@ alicevision_ensure_dependency(Osi
 #
 # Dependencies: CoinUtils, Osi
 # =============================================================================
-alicevision_ensure_dependency(Clp
-    VERSION 1...<2
-    ALLOW_CMAKE_MODULE
-)
+#alicevision_ensure_dependency(Clp
+#    VERSION 1...<2
+#    ALLOW_CMAKE_MODULE
+#)
 
 # =============================================================================
 # LEMON
@@ -630,9 +366,9 @@ alicevision_ensure_dependency(Clp
 #
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(LEMON
-    VERSION 1.3...<2
-)
+#alicevision_ensure_dependency(LEMON
+#    VERSION 1.3...<2
+#)
 
 # =============================================================================
 # Xerces-C
@@ -640,9 +376,9 @@ alicevision_ensure_dependency(LEMON
 #
 # Dependencies: Threads
 # =============================================================================
-alicevision_ensure_dependency(XercesC
-    VERSION 3.2...<4
-)
+#alicevision_ensure_dependency(XercesC
+#    VERSION 3.2...<4
+#)
 
 # =============================================================================
 # E57Format
@@ -650,7 +386,7 @@ alicevision_ensure_dependency(XercesC
 #
 # Dependencies: Xerces-C, Threads
 # =============================================================================
-alicevision_ensure_dependency(E57Format)
+#alicevision_ensure_dependency(E57Format)
 
 # =============================================================================
 # Assimp
@@ -662,9 +398,9 @@ alicevision_ensure_dependency(E57Format)
 #
 # Dependencies: Threads
 # =============================================================================
-alicevision_ensure_dependency(Assimp
-    VERSION 5.0.0...<=6.0.5
-)
+#alicevision_ensure_dependency(Assimp
+#    VERSION 5.0.0...<=6.0.5
+#)
 
 # =============================================================================
 # Alembic
@@ -672,9 +408,9 @@ alicevision_ensure_dependency(Assimp
 #
 # Dependencies: Threads
 # =============================================================================
-alicevision_ensure_dependency(Alembic
-    VERSION 1.7.0...
-)
+#alicevision_ensure_dependency(Alembic
+#    VERSION 1.7.0...
+#)
 
 # =============================================================================
 # libTIFF
@@ -682,10 +418,10 @@ alicevision_ensure_dependency(Alembic
 #
 # Dependencies: Threads
 # =============================================================================
-alicevision_ensure_dependency(TIFF
-    VERSION 4.0...<=5
-    ALLOW_CMAKE_MODULE
-)
+#alicevision_ensure_dependency(TIFF
+#    VERSION 4.0...<=5
+#    ALLOW_CMAKE_MODULE
+#)
 
 # =============================================================================
 # libjpeg-turbo
@@ -693,9 +429,9 @@ alicevision_ensure_dependency(TIFF
 #
 # Dependencies: zlib
 # =============================================================================
-alicevision_ensure_dependency(libjpeg-turbo
-    VERSION 2.1...
-)
+#alicevision_ensure_dependency(libjpeg-turbo
+#    VERSION 2.1...
+#)
 
 # =============================================================================
 # libPNG
@@ -707,10 +443,10 @@ alicevision_ensure_dependency(libjpeg-turbo
 #
 # Dependencies: zlib
 # =============================================================================
-alicevision_ensure_dependency(PNG
-    VERSION 1.6...<=1.6.58
-    ALLOW_CMAKE_MODULE
-)
+#alicevision_ensure_dependency(PNG
+#    VERSION 1.6
+#    ALLOW_CMAKE_MODULE
+#)
 
 # =============================================================================
 # libRAW
@@ -718,9 +454,9 @@ alicevision_ensure_dependency(PNG
 #
 # Dependencies: zlib, JPEG, (OpenMP)
 # =============================================================================
-alicevision_ensure_dependency(libraw
-    VERSION 0.20...
-)
+#alicevision_ensure_dependency(libraw
+#    VERSION 0.20...
+#)
 
 # =============================================================================
 # OpenJPEG
@@ -728,9 +464,9 @@ alicevision_ensure_dependency(libraw
 #
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(OpenJPEG
-    VERSION 2.0...<3
-)
+#alicevision_ensure_dependency(OpenJPEG
+#    VERSION 2.0...<3
+#)
 
 # =============================================================================
 # GIFLIB
@@ -742,10 +478,10 @@ alicevision_ensure_dependency(OpenJPEG
 #
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(GIF
-    VERSION 5.0...<=6.1.3
-    ALLOW_CMAKE_MODULE
-)
+#alicevision_ensure_dependency(GIF
+#    VERSION 5.0...<=6.1.3
+#    ALLOW_CMAKE_MODULE
+#)
 
 # =============================================================================
 # libheif: TODO
@@ -757,9 +493,9 @@ alicevision_ensure_dependency(GIF
 #
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(WebP
-    VERSION 1.1...
-)
+#alicevision_ensure_dependency(WebP
+#    VERSION 1.1...
+#)
 
 # =============================================================================
 # libjxl: TODO
@@ -772,9 +508,9 @@ alicevision_ensure_dependency(WebP
 # Dependencies: Imath, OpenEXR, libTIFF, OpenColorIO, libjpeg-turbo, zlib,
 # (libPNG, libraw, OpenJPEG, TBB/oneTBB, GIFLIB, libheif, WebP, libjxl)
 # =============================================================================
-alicevision_ensure_dependency(OpenImageIO
-    VERSION 3.0.0...<4
-)
+#alicevision_ensure_dependency(OpenImageIO
+#    VERSION 3.0.0...<4
+#)
 
 # =============================================================================
 # Fixup targets to be under out third-party folder in IDEs

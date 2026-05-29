@@ -1,21 +1,123 @@
-# IDE folders
+# =============================================================================
+# IDE related
+# =============================================================================
+
 .idea
 .zed
 .vscode
 
-# Build folders and artifacts
-build*
+# =============================================================================
+# CMake related
+# =============================================================================
 
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
+
+# =============================================================================
+# C++ related
+# =============================================================================
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
 *.o
-*.a
-*.dylib
-*.framework
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
 *.so
-*.lib
+*.dylib
 *.dll
+*.so.*
 
-# CLion/IntelliJ CMake folders
-cmake-build-*
+# Fortran module files
+*.mod
+*.smod
 
-# maOS mdstore files
-*.DS_Store
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Build directories
+build/
+Build/
+build-*/
+
+# CMake generated files
+CMakeFiles/
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp
+
+# vcpkg
+vcpkg_installed/
+
+# debug information files
+*.dwo
+
+# test output & cache
+Testing/
+.cache/
+
+# =============================================================================
+# C related
+# =============================================================================
+
+# Object files
+*.ko
+*.elf
+
+# Linker output
+*.map
+*.exp
+
+# Executables
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+
+# CUDA related
+
+*.i
+*.ii
+*.gpu
+*.ptx
+*.cubin
+*.fatbin

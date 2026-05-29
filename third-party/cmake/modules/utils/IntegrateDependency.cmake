@@ -15,6 +15,7 @@ include_guard(DIRECTORY)
 #    [PATCH_STEP...]
 #    [SOURCE_SUBDIR <SOURCE_DIR>]
 #    [SUBMODULE_NAME <NAME>]
+#    [CMAKE_EVAL_COMPAT_CODE...]
 # )
 # =============================================================================
 function(alicevision_integrate_dependency AV_DEP_NAME)
@@ -25,7 +26,7 @@ function(alicevision_integrate_dependency AV_DEP_NAME)
   cmake_parse_arguments(PARSE_ARGV 0 AV_DEP
       ""
       "SOURCE_SUBDIR;SUBMODULE_NAME"
-      "CMAKE_EVAL_CODE;PATCH_STEP"
+      "CMAKE_EVAL_CODE;CMAKE_EVAL_COMPAT_CODE;PATCH_STEP"
   )
 
   # Extract the key and value for each passed option
@@ -53,10 +54,25 @@ function(alicevision_integrate_dependency AV_DEP_NAME)
   # Build the patch step arguments if required
   set(AV_DEP_PATCH_STEP_FC_EXPANDED)
   if(DEFINED AV_DEP_PATCH_STEP)
+
+    # We must have Git available
+    if(NOT Git_FOUND)
+      find_package(Git REQUIRED QUIET)
+    endif()
+
     list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "UPDATE_DISCONNECTED")
     list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "1")
-    list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "PATCH_STEP")
-    list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "${AV_DEP_PATCH_STEP}")
+    list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "PATCH_COMMAND")
+    list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED
+      # Fixes the target_include_dir call for openjph to match an installed layout
+      ${CMAKE_COMMAND}
+        -DPATCH_WORKDIR=${AV_DEP_SOURCE_DIR}
+        -DPATCH_FILE=${AV_DEP_PATCH_STEP}
+        -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+        -DQUIET=ON
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/ApplyGitPatchSafe.cmake
+    )
+    message(TRACE "[alicevision_integrate_dependency] Generated patch step args: ${AV_DEP_PATCH_STEP_FC_EXPANDED}")
   endif()
 
   # Declare the dependency
@@ -90,6 +106,12 @@ function(alicevision_integrate_dependency AV_DEP_NAME)
   if(NOT ALICEVISION_LOG_THIRD_PARTY_CONFIGURE)
     set(CMAKE_MESSAGE_LOG_LEVEL ${AV_GLOBAL_LOG_LEVEL} CACHE STRING "The CMake Message log level" FORCE)
   endif()
+
+  # Extract the key and value for each passed compatibility option
+  foreach(AV_DEP_OPTION_KV IN LISTS AV_DEP_CMAKE_EVAL_COMPAT_CODE)
+    message(TRACE "[alicevision_integrate_dependency] Evaluating compatibility option: ${AV_DEP_OPTION_KV}")
+    cmake_language(EVAL CODE "${AV_DEP_OPTION_KV}")
+  endforeach()
 
   message(STATUS "Configured third-party dependency ${AV_DEP_NAME}.")
 

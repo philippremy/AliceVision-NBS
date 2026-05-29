@@ -4,13 +4,10 @@
 
 #include <iostream>
 
-#include <omp.h>
-
-#include <ClpSimplex.hpp>
-#include <ClpSolve.hpp>
+#include <Eigen/Core>
 
 using namespace std;
 
 int main() {
-    ClpSolve solve;
+
 }

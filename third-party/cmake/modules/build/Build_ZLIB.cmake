@@ -7,7 +7,7 @@
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
 
-alicevision_integrate_dependency(zlib
+alicevision_integrate_dependency(ZLIB
     CMAKE_EVAL_CODE
       "set(ZLIB_BUILD_TESTING OFF)"
       "set(ZLIB_BUILD_SHARED ${BUILD_SHARED_LIBS})"
