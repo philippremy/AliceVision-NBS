@@ -8,6 +8,7 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
 
 alicevision_integrate_dependency(LZ4
+    SUBMODULE_NAME "lz4"
     SOURCE_SUBDIR "build/cmake"
     CMAKE_EVAL_CODE
       "set(LZ4_BUILD_CLI OFF)"

@@ -8,6 +8,7 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
 
 alicevision_integrate_dependency(Boost
+    SUBMODULE_NAME "boost"
     CMAKE_EVAL_CODE
       "set(BOOST_INCLUDE_LIBRARIES
         atomic
