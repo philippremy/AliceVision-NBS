@@ -71,10 +71,16 @@ endif()
 # which might use deprecated CMake policies by default.
 # CMP0077: If not set, older projects may overwrite set() calls with option()
 # CMP0126: If not set, older projects may overwrite set() calls with set(CACHE)
+# CMP0074: If not set, older projects might ignore <PackageName>_ROOT variables
+# CMP0135: If not set, older project might use wrong download timestamps
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 cmake_policy(SET CMP0077 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0126 NEW)
 cmake_policy(SET CMP0126 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
+cmake_policy(SET CMP0074 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
+cmake_policy(SET CMP0135 NEW)
 
 # We don't want the targets found through any find_package() call of a third-
 # party project to be promoted to global scope.
@@ -87,13 +93,23 @@ set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL OFF)
 # during build time so we unconditionally disable all compiler warnings by
 # default unless the user opted-in to have them emitted.
 if(NOT ALICEVISION_PRINT_THIRD_PARTY_WARNINGS)
-  if(MSVC OR CMAKE_CXX_COMPILER_ID MATCHES "(GNU|AppleClang|Clang)")
+  if(MSVC OR (CMAKE_C_COMPILER_ID MATCHES "(GNU|AppleClang|Clang)" AND CMAKE_CXX_COMPILER_ID MATCHES "(GNU|AppleClang|Clang)"))
     set_directory_properties(
         PROPERTIES COMPILE_OPTIONS $<$<COMPILE_LANGUAGE:C,CXX>:$<IF:$<BOOL:${MSVC}>,/W0,-w>>
     )
-    message(STATUS "Compiler warnings for third-party projects will be suppressed.")
+    message(STATUS "C/C++ Compiler warnings for third-party projects will be suppressed.")
   else()
-    message(STATUS "Compiler warnings for third-party projects cannot be suppressed because the compiler is not yet supported (${CMAKE_CXX_COMPILER_ID}).")
+    message(STATUS "C/C++ Compiler warnings for third-party projects cannot be suppressed because the compiler is not yet supported (${CMAKE_CXX_COMPILER_ID}).")
+  endif()
+  if(CMAKE_Fortran_COMPILER)
+    if(CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|LLVMFlang|G95|GNU)")
+      set_directory_properties(
+          PROPERTIES COMPILE_OPTIONS $<$<COMPILE_LANGUAGE:Fortran>:-w>
+      )
+      message(STATUS "Fortran Compiler warnings for third-party projects will be suppressed.")
+    else()
+      message(STATUS "Fortran Compiler warnings for third-party projects cannot be suppressed because the compiler is not yet supported (${CMAKE_Fortran_COMPILER_ID}).")
+    endif()
   endif()
 else()
   message(STATUS "Compiler warnings for third-party projects will be emitted (build can be noisy!)")
@@ -295,7 +311,7 @@ alicevision_ensure_dependency(Eigen
 #
 # NOTE:
 # Must use ALLOW_CMAKE_MODULE because package-manager provided versions might
-# not ship an accompanying lz4Config.cmake file. We provide our own
+# not ship an accompanying LZ4Config.cmake file. We provide our own
 # FindLZ4.cmake module to provide minimal support.
 #
 # Dependencies: None
@@ -310,9 +326,9 @@ alicevision_ensure_dependency(LZ4
 #
 # Dependencies: LZ4 (OpenMP, CUDA)
 # =============================================================================
-#alicevision_ensure_dependency(flann
-#  VERSION 1.8.4...<2
-#)
+alicevision_ensure_dependency(flann
+  VERSION 1.8.4...<2
+)
 
 # =============================================================================
 # (Open)BLAS/(Open)LAPACK
@@ -320,12 +336,12 @@ alicevision_ensure_dependency(LZ4
 #
 # Dependencies: None
 # =============================================================================
-#alicevision_ensure_dependency(BLAS
-#    ALLOW_CMAKE_MODULE
-#)
-#alicevision_ensure_dependency(LAPACK
-#    ALLOW_CMAKE_MODULE
-#)
+alicevision_ensure_dependency(BLAS
+    ALLOW_CMAKE_MODULE
+)
+alicevision_ensure_dependency(LAPACK
+    ALLOW_CMAKE_MODULE
+)
 
 # =============================================================================
 # CoinUtils
@@ -511,6 +527,12 @@ alicevision_ensure_dependency(LZ4
 #alicevision_ensure_dependency(OpenImageIO
 #    VERSION 3.0.0...<4
 #)
+
+# =============================================================================
+# Fixup targets to be under out third-party folder in IDEs
+# =============================================================================
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/FixupTargetWarningFlags.cmake)
+alicevision_ensure_target_nowarn(${CMAKE_CURRENT_SOURCE_DIR})
 
 # =============================================================================
 # Fixup targets to be under out third-party folder in IDEs

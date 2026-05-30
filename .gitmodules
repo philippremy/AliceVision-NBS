@@ -43,3 +43,9 @@
 [submodule "third-party/lz4"]
 	path = third-party/lz4
 	url = https://github.com/lz4/lz4.git
+[submodule "third-party/flann"]
+	path = third-party/flann
+	url = https://github.com/flann-lib/flann.git
+[submodule "third-party/OpenBLAS"]
+	path = third-party/OpenBLAS
+	url = https://github.com/OpenMathLib/OpenBLAS.git

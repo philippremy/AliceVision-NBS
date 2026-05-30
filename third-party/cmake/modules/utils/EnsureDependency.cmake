@@ -187,12 +187,22 @@ function(alicevision_ensure_dependency AV_DEP_NAME)
     message(FATAL_ERROR "Must provide a dependency name to alicevision_ensure_dependency!")
   endif()
 
+  # We must have a special handling for BLAS and LAPACK on macOS, if the build
+  # is a universal build. OpenBLAS does not support a universal build and it is
+  # likely never needed, because macOS provides its custom BLAS/LAPACK.
+  set(AV_DEP_BLAS_LAPACK_SHORT_CIRCUIT OFF)
+  if(AV_IS_APPLE_UNIVERSAL_BUILD
+     AND (AV_DEP_NAME STREQUAL "BLAS" OR AV_DEP_NAME STREQUAL "LAPACK"))
+    set(AV_DEP_BLAS_LAPACK_SHORT_CIRCUIT ON)
+  endif()
+
   # Either we can look for all dependencies provided externally or the user
   # explicitly opted in for this specific dependency
   # Is forcibly overridden by ALICEVISION_FORCE_BUILD_<DEP_NAME>
-  if((ALICEVISION_ALLOW_SYSTEM_DEPENDENCIES
+  if(((ALICEVISION_ALLOW_SYSTEM_DEPENDENCIES
       OR ALICEVISION_ALLOW_SYSTEM_${AV_DEP_NAME})
-      AND NOT ALICEVISION_FORCE_BUILD_${AV_DEP_NAME}
+      AND NOT ALICEVISION_FORCE_BUILD_${AV_DEP_NAME})
+      OR AV_DEP_BLAS_LAPACK_SHORT_CIRCUIT
   )
 
     # Pass 1: Prefer CONFIG mode (supports NAMES for alternative config package names).
