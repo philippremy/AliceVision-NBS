@@ -34,7 +34,7 @@ alicevision_integrate_dependency(BLAS
     PATCH_STEP
       "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/OpenBLAS-CMakeBinaryDir.patch"
     CMAKE_EVAL_CODE
-      "set(INTERFACE64 ON)"
+      "set(INTERFACE64 OFF)"
       "set(BUILD_WITHOUT_LAPACK OFF)"
       "set(BUILD_WITHOUT_LAPACKE ON)"
       "set(BUILD_LAPACK_DEPRECATED ON)"
@@ -75,7 +75,7 @@ if(NOT TARGET BLAS::BLAS)
   # an OpenBLAS implementation, which internally correctly sets
   # BLA_SIZEOF_INTEGER correctly. If not built, SuiteSparse can find any BLAS.
   set(BLA_VENDOR OpenBLAS CACHE STRING "The vendor of the BLAS/LAPACK")
-  set(BLA_SIZEOF_INTEGER 8 CACHE STRING "The size of an integer in the BLAS in bytes")
+  set(BLA_SIZEOF_INTEGER 4 CACHE STRING "The size of an integer in the BLAS in bytes")
 
 endif()
 

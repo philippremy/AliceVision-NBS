@@ -344,6 +344,24 @@ alicevision_ensure_dependency(LAPACK
 )
 
 # =============================================================================
+# SuiteSparse
+# (Version compatibility: SameMajorVersion)
+#
+# Dependencies: BLAS/LAPACK
+# =============================================================================
+alicevision_ensure_dependency(SuiteSparse
+    VERSION 4.5.6
+    ALLOW_CMAKE_MODULE
+    COMPONENTS
+      AMD
+      CAMD
+      CCOLAMD
+      CHOLMOD
+      COLAMD
+      SPQR
+)
+
+# =============================================================================
 # CoinUtils
 # (Version compatibility: Unknown, suspecting SameMajorVersion)
 #
