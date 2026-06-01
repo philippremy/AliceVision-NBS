@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e103c40..79470ff 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,7 +39,6 @@ include(CheckFunctionExists)
+ include(CheckIncludeFile)
+ include(CMakePackageConfigHelpers)
+ include(CheckTypeSize)
+-include(CPack)
+ include(GNUInstallDirs)
+ 
+ set(CPACK_INCLUDED TRUE)

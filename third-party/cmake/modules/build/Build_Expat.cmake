@@ -10,6 +10,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmak
 alicevision_integrate_dependency(Expat
     SOURCE_SUBDIR "expat"
     SUBMODULE_NAME "libexpat"
+    PATCH_STEP
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/Expat-CPack.patch"
     CMAKE_EVAL_CODE
       "set(EXPAT_BUILD_TOOLS OFF)"
       "set(EXPAT_BUILD_EXAMPLES OFF)"

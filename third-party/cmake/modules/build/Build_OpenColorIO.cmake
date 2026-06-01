@@ -8,6 +8,8 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
 
 alicevision_integrate_dependency(OpenColorIO
+    PATCH_STEP
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/OpenColorIO-sse2neonBaseDir-CMakeBinaryDir.patch"
     CMAKE_EVAL_CODE
       "set(OCIO_BUILD_APPS OFF)"
       "set(OCIO_BUILD_OPENFX OFF)"

@@ -1,0 +1,235 @@
+diff --git a/share/cmake/modules/install/InstallDirectX-Headers.cmake b/share/cmake/modules/install/InstallDirectX-Headers.cmake
+index 69132f41..5cec7d80 100644
+--- a/share/cmake/modules/install/InstallDirectX-Headers.cmake
++++ b/share/cmake/modules/install/InstallDirectX-Headers.cmake
+@@ -14,7 +14,7 @@ else()
+     set(DirectX-Headers_VERSION ${DirectX-Headers_FIND_VERSION})
+ endif()
+ 
+-set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/ext/build/DirectX-Headers")
++set(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}/ext/build/DirectX-Headers")
+ set(DIRECTX_HEADERS_BUILD_TEST OFF CACHE BOOL "" FORCE)
+ 
+ FetchContent_Declare(DirectX-Headers
+diff --git a/share/cmake/modules/install/Installsse2neon.cmake b/share/cmake/modules/install/Installsse2neon.cmake
+index ced4ae13..cd51a6f7 100644
+--- a/share/cmake/modules/install/Installsse2neon.cmake
++++ b/share/cmake/modules/install/Installsse2neon.cmake
+@@ -13,7 +13,7 @@
+ 
+ include(FetchContent)
+ 
+-set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/ext/build/sse2neon")
++set(FETCHCONTENT_BASE_DIR "${PROJECT_BINARY_DIR}/ext/build/sse2neon")
+ FetchContent_Declare(sse2neon
+   GIT_REPOSITORY https://github.com/DLTcollab/sse2neon.git
+   GIT_TAG        227cc413fb2d50b2a10073087be96b59d5364aea
+@@ -26,7 +26,7 @@ FetchContent_GetProperties(sse2neon)
+ if(NOT sse2neon_POPULATED)
+   FetchContent_MakeAvailable(sse2neon)
+ 
+-  set(_EXT_DIST_INCLUDE "${CMAKE_BINARY_DIR}/ext/dist/${CMAKE_INSTALL_INCLUDEDIR}")
++  set(_EXT_DIST_INCLUDE "${PROJECT_BINARY_DIR}/ext/dist/${CMAKE_INSTALL_INCLUDEDIR}")
+   file(COPY "${sse2neon_SOURCE_DIR}/sse2neon.h" DESTINATION "${_EXT_DIST_INCLUDE}/sse2neon")
+ 
+   # sse2neon_INCLUDE_DIR is used internally for CheckSupportSSEUsingSSE2NEON.cmake and to create sse2neon
+diff --git a/share/cmake/utils/CheckSupportAVX.cmake b/share/cmake/utils/CheckSupportAVX.cmake
+index fd040b08..eab3aca2 100644
+--- a/share/cmake/utils/CheckSupportAVX.cmake
++++ b/share/cmake/utils/CheckSupportAVX.cmake
+@@ -36,12 +36,12 @@ set(AVX_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/avx_test.cpp" "${AVX_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/avx_test.cpp" "${AVX_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_AVX")
+ try_compile(COMPILER_SUPPORTS_AVX
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/avx_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/avx_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_AVX)
+diff --git a/share/cmake/utils/CheckSupportAVX2.cmake b/share/cmake/utils/CheckSupportAVX2.cmake
+index f5a75442..e04b541b 100644
+--- a/share/cmake/utils/CheckSupportAVX2.cmake
++++ b/share/cmake/utils/CheckSupportAVX2.cmake
+@@ -44,12 +44,12 @@ set(AVX2_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/avx2_test.cpp" "${AVX2_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/avx2_test.cpp" "${AVX2_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_AVX2")
+ try_compile(COMPILER_SUPPORTS_AVX2
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/avx2_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/avx2_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_AVX2)
+diff --git a/share/cmake/utils/CheckSupportAVX512.cmake b/share/cmake/utils/CheckSupportAVX512.cmake
+index 98004b1d..dbb2fa87 100644
+--- a/share/cmake/utils/CheckSupportAVX512.cmake
++++ b/share/cmake/utils/CheckSupportAVX512.cmake
+@@ -34,12 +34,12 @@ set(AVX512_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/avx512_test.cpp" "${AVX512_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/avx512_test.cpp" "${AVX512_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_AVX512")
+ try_compile(COMPILER_SUPPORTS_AVX512
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/avx512_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/avx512_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_AVX512)
+diff --git a/share/cmake/utils/CheckSupportF16C.cmake b/share/cmake/utils/CheckSupportF16C.cmake
+index 45672d67..38b43d27 100644
+--- a/share/cmake/utils/CheckSupportF16C.cmake
++++ b/share/cmake/utils/CheckSupportF16C.cmake
+@@ -32,12 +32,12 @@ set(F16C_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/f16c_test.cpp" "${F16C_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/f16c_test.cpp" "${F16C_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_F16C")
+ try_compile(COMPILER_SUPPORTS_F16C
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/f16c_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/f16c_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_F16C)
+diff --git a/share/cmake/utils/CheckSupportSSE2.cmake b/share/cmake/utils/CheckSupportSSE2.cmake
+index 6a07155d..3570503f 100644
+--- a/share/cmake/utils/CheckSupportSSE2.cmake
++++ b/share/cmake/utils/CheckSupportSSE2.cmake
+@@ -45,12 +45,12 @@ set(SSE2_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/sse2_test.cpp" "${SSE2_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse2_test.cpp" "${SSE2_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_SSE2")
+ try_compile(COMPILER_SUPPORTS_SSE2
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/sse2_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse2_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_SSE2)
+diff --git a/share/cmake/utils/CheckSupportSSE3.cmake b/share/cmake/utils/CheckSupportSSE3.cmake
+index ef1dbd31..5e8b6bd6 100644
+--- a/share/cmake/utils/CheckSupportSSE3.cmake
++++ b/share/cmake/utils/CheckSupportSSE3.cmake
+@@ -32,12 +32,12 @@ set(SSE3_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/sse3_test.cpp" "${SSE3_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse3_test.cpp" "${SSE3_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_SSE3")
+ try_compile(COMPILER_SUPPORTS_SSE3
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/sse3_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse3_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_SSE3)
+diff --git a/share/cmake/utils/CheckSupportSSE4.cmake b/share/cmake/utils/CheckSupportSSE4.cmake
+index dd41624d..0d0b425a 100644
+--- a/share/cmake/utils/CheckSupportSSE4.cmake
++++ b/share/cmake/utils/CheckSupportSSE4.cmake
+@@ -32,12 +32,12 @@ set(SSE4_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/sse4_test.cpp" "${SSE4_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse4_test.cpp" "${SSE4_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_SSE4")
+ try_compile(COMPILER_SUPPORTS_SSE4
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/sse4_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse4_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_SSE4)
+diff --git a/share/cmake/utils/CheckSupportSSE42.cmake b/share/cmake/utils/CheckSupportSSE42.cmake
+index 0e0afe23..ee43edb9 100644
+--- a/share/cmake/utils/CheckSupportSSE42.cmake
++++ b/share/cmake/utils/CheckSupportSSE42.cmake
+@@ -32,12 +32,12 @@ set(SSE42_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/sse42_test.cpp" "${SSE42_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse42_test.cpp" "${SSE42_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_SSE42")
+ try_compile(COMPILER_SUPPORTS_SSE42
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/sse42_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse42_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_SSE42)
+diff --git a/share/cmake/utils/CheckSupportSSEUsingSSE2NEON.cmake b/share/cmake/utils/CheckSupportSSEUsingSSE2NEON.cmake
+index d24cda55..c3be92e1 100644
+--- a/share/cmake/utils/CheckSupportSSEUsingSSE2NEON.cmake
++++ b/share/cmake/utils/CheckSupportSSEUsingSSE2NEON.cmake
+@@ -49,12 +49,12 @@ if((APPLE OR WIN32) AND COMPILER_SUPPORTS_ARM_NEON)
+         }
+     ")
+ 
+-    file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/sse2neon_test.cpp" "${SSE2NEON_CODE}")
++    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse2neon_test.cpp" "${SSE2NEON_CODE}")
+ 
+     message(STATUS "Performing Test COMPILER_SUPPORTS_SSE_WITH_SSE2NEON")
+     try_compile(COMPILER_SUPPORTS_SSE_WITH_SSE2NEON
+-      "${CMAKE_BINARY_DIR}/CMakeTmp"
+-      "${CMAKE_BINARY_DIR}/CMakeTmp/sse2neon_test.cpp"
++      "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++      "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/sse2neon_test.cpp"
+       COMPILE_DEFINITIONS "-I${sse2neon_INCLUDE_DIR}"
+     )
+ 
+diff --git a/share/cmake/utils/CheckSupportSSSE3.cmake b/share/cmake/utils/CheckSupportSSSE3.cmake
+index ffa114a7..c02b95db 100644
+--- a/share/cmake/utils/CheckSupportSSSE3.cmake
++++ b/share/cmake/utils/CheckSupportSSSE3.cmake
+@@ -32,12 +32,12 @@ set(SSSE3_CODE "
+     }
+ ")
+ 
+-file(WRITE "${CMAKE_BINARY_DIR}/CMakeTmp/ssse3_test.cpp" "${SSSE3_CODE}")
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/ssse3_test.cpp" "${SSSE3_CODE}")
+ 
+ message(STATUS "Performing Test COMPILER_SUPPORTS_SSSE3")
+ try_compile(COMPILER_SUPPORTS_SSSE3
+-  "${CMAKE_BINARY_DIR}/CMakeTmp"
+-  "${CMAKE_BINARY_DIR}/CMakeTmp/ssse3_test.cpp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp"
++  "${CMAKE_CURRENT_BINARY_DIR}/CMakeTmp/ssse3_test.cpp"
+ )
+ 
+ if(COMPILER_SUPPORTS_SSSE3)

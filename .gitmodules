@@ -49,3 +49,6 @@
 [submodule "third-party/OpenBLAS"]
 	path = third-party/OpenBLAS
 	url = https://github.com/OpenMathLib/OpenBLAS.git
+[submodule "third-party/SuiteSparse"]
+	path = third-party/SuiteSparse
+	url = https://github.com/DrTimothyAldenDavis/SuiteSparse.git

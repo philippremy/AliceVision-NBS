@@ -1,0 +1,263 @@
+diff --git a/AMD/CMakeLists.txt b/AMD/CMakeLists.txt
+index c7a227090..3f433054c 100644
+--- a/AMD/CMakeLists.txt
++++ b/AMD/CMakeLists.txt
+@@ -173,11 +173,6 @@ if ( BUILD_SHARED_LIBS )
+         RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT AMDTargets
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/AMDTargets.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT AMDTargets
+         NAMESPACE SuiteSparse::
+@@ -189,11 +184,6 @@ if ( BUILD_STATIC_LIBS )
+         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT AMDTargets_static
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/AMDTargets_static.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT AMDTargets_static
+         NAMESPACE SuiteSparse::
+diff --git a/CAMD/CMakeLists.txt b/CAMD/CMakeLists.txt
+index 9abf30873..19b577107 100644
+--- a/CAMD/CMakeLists.txt
++++ b/CAMD/CMakeLists.txt
+@@ -163,11 +163,6 @@ if ( BUILD_SHARED_LIBS )
+         RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT CAMDTargets
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/CAMDTargets.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT CAMDTargets
+         NAMESPACE SuiteSparse::
+@@ -179,11 +174,6 @@ if ( BUILD_STATIC_LIBS )
+         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT CAMDTargets_static
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/CAMDTargets_static.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT CAMDTargets_static
+         NAMESPACE SuiteSparse::
+diff --git a/CCOLAMD/CMakeLists.txt b/CCOLAMD/CMakeLists.txt
+index 9f212a907..18cca5a8b 100644
+--- a/CCOLAMD/CMakeLists.txt
++++ b/CCOLAMD/CMakeLists.txt
+@@ -160,11 +160,6 @@ if ( BUILD_SHARED_LIBS )
+         RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT CCOLAMDTargets
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/CCOLAMDTargets.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT CCOLAMDTargets
+         NAMESPACE SuiteSparse::
+@@ -176,11 +171,6 @@ if ( BUILD_STATIC_LIBS )
+         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT CCOLAMDTargets_static
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/CCOLAMDTargets_static.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT CCOLAMDTargets_static
+         NAMESPACE SuiteSparse::
+diff --git a/CHOLMOD/CMakeLists.txt b/CHOLMOD/CMakeLists.txt
+index 31aac2dc1..62126cd12 100644
+--- a/CHOLMOD/CMakeLists.txt
++++ b/CHOLMOD/CMakeLists.txt
+@@ -652,11 +652,6 @@ if ( BUILD_SHARED_LIBS )
+         RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT CHOLMODTargets
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/CHOLMODTargets.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT CHOLMODTargets
+         NAMESPACE SuiteSparse::
+@@ -668,11 +663,6 @@ if ( BUILD_STATIC_LIBS )
+         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT CHOLMODTargets_static
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/CHOLMODTargets_static.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT CHOLMODTargets_static
+         NAMESPACE SuiteSparse::
+diff --git a/COLAMD/CMakeLists.txt b/COLAMD/CMakeLists.txt
+index 2aaf28b60..d24b2788c 100644
+--- a/COLAMD/CMakeLists.txt
++++ b/COLAMD/CMakeLists.txt
+@@ -160,11 +160,6 @@ if ( BUILD_SHARED_LIBS )
+         RUNTIME DESTINATION ${SUITESPARSE_BINDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT COLAMDTargets
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/COLAMDTargets.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT COLAMDTargets
+         NAMESPACE SuiteSparse::
+@@ -176,11 +171,6 @@ if ( BUILD_STATIC_LIBS )
+         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
+         PUBLIC_HEADER DESTINATION ${SUITESPARSE_INCLUDEDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT COLAMDTargets_static
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/COLAMDTargets_static.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT COLAMDTargets_static
+         NAMESPACE SuiteSparse::
+diff --git a/SPQR/CMakeLists.txt b/SPQR/CMakeLists.txt
+index 3c2300eb2..bed52c6cc 100644
+--- a/SPQR/CMakeLists.txt
++++ b/SPQR/CMakeLists.txt
+@@ -252,11 +252,6 @@ if ( BUILD_SHARED_LIBS )
+         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR}
+         RUNTIME DESTINATION ${SUITESPARSE_BINDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT SPQRTargets
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/SPQRTargets.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT SPQRTargets
+         NAMESPACE SuiteSparse::
+@@ -267,11 +262,6 @@ if ( BUILD_STATIC_LIBS )
+         EXPORT SPQRTargets_static
+         ARCHIVE DESTINATION ${SUITESPARSE_LIBDIR} )
+ 
+-    # create (temporary) export target file during build
+-    export ( EXPORT SPQRTargets_static
+-        NAMESPACE SuiteSparse::
+-        FILE ${CMAKE_CURRENT_BINARY_DIR}/SPQRTargets_static.cmake )
+-
+     # install export target, config and version files for find_package
+     install ( EXPORT SPQRTargets_static
+         NAMESPACE SuiteSparse::
+diff --git a/SuiteSparse_config/cmake_modules/SuiteSparse__blas_threading.cmake b/SuiteSparse_config/cmake_modules/SuiteSparse__blas_threading.cmake
+index f6cc9f5f6..ff32e34a2 100644
+--- a/SuiteSparse_config/cmake_modules/SuiteSparse__blas_threading.cmake
++++ b/SuiteSparse_config/cmake_modules/SuiteSparse__blas_threading.cmake
+@@ -38,24 +38,9 @@ if ( NOT ( ${CMAKE_SYSTEM} MATCHES ${CMAKE_HOST_SYSTEM} ) )
+     message ( STATUS "target system: ${CMAKE_SYSTEM}" )
+     message ( STATUS "host system:   ${CMAKE_HOST_SYSTEM}" )
+ 
+-    if ( ${BLA_VENDOR} STREQUAL "OpenBLAS" )
+-        # check if OpenBLAS has openblas_set_num_threads_local (Apr 2024 or later)
+-        get_filename_component ( ABS_SOURCE_PATH
+-            ${PROJECT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules/check_openblas_Apr2024.c
+-            ABSOLUTE )
+-        try_compile ( OPENBLAS_2024_COMPILES
+-            ${CMAKE_CURRENT_BINARY_DIR}
+-            ${ABS_SOURCE_PATH}
+-            LINK_OPTIONS    ${BLAS_LINKER_FLAGS}
+-            LINK_LIBRARIES  ${BLAS_LIBRARIES} )
+-        if ( ${OPENBLAS_2024_COMPILES} )
+-            # We have OpenBLAS 0.3.27 or later;
+-            add_compile_definitions ( SUITESPARSE_HAVE_OPENBLAS_SET_NUM_THREADS_LOCAL )
+-            message ( STATUS "BLAS: OpenBLAS v0.3.27 or later" )
+-        else ( )
+-            message ( STATUS "BLAS: OpenBLAS v0.2.14 to v0.3.26" )
+-        endif ( )
+-    endif ( )
++    # We have OpenBLAS 0.3.27 or later;
++    add_compile_definitions ( SUITESPARSE_HAVE_OPENBLAS_SET_NUM_THREADS_LOCAL )
++    message ( STATUS "BLAS: OpenBLAS v0.3.27 or later" )
+ 
+     return ( )
+ endif ( )
+@@ -104,56 +89,12 @@ endif ( )
+ 
+ if ( ${BLA_VENDOR} STREQUAL "OpenBLAS" )
+ 
+-    # check if OpenBLAS has openblas_get_num_threads (Mar 2015 or later)
+-    get_filename_component ( ABS_SOURCE_PATH
+-        ${PROJECT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules/check_openblas_Mar2015.c
+-        ABSOLUTE )
+-    try_run ( OPENBLAS_2015_RUNS OPENBLAS_2015_COMPILES
+-        ${CMAKE_CURRENT_BINARY_DIR}
+-        ${ABS_SOURCE_PATH}
+-        LINK_OPTIONS    ${BLAS_LINKER_FLAGS}
+-        LINK_LIBRARIES  ${BLAS_LIBRARIES}
+-        RUN_OUTPUT_VARIABLE OPENBLAS_2015_OUTPUT )
+-    if ( ${OPENBLAS_2015_COMPILES} )
+-        if ( ${OPENBLAS_2015_RUNS} STREQUAL "FAILED_TO_RUN" )
+-            # OpenBLAS compiled but failed to run ... why?
+-            message ( FATAL_ERROR "BLAS: OpenBLAS failed to run (v0.2.14 or later is required)" )
+-        endif ( ) 
+-    else ( )
+-        message ( FATAL_ERROR "BLAS: OpenBLAS failed to compile (v0.2.14 or later is required)" )
+-    endif ( )
++    # We have OpenBLAS 0.3.27 or later;
++    add_compile_definitions ( SUITESPARSE_HAVE_OPENBLAS_SET_NUM_THREADS_LOCAL )
++    message ( STATUS "BLAS: OpenBLAS v0.3.27 or later" )
+ 
+-    # check if OpenBLAS has openblas_set_num_threads_local (Apr 2024 or later)
+-    get_filename_component ( ABS_SOURCE_PATH
+-        ${PROJECT_SOURCE_DIR}/../SuiteSparse_config/cmake_modules/check_openblas_Apr2024.c
+-        ABSOLUTE )
+-    try_run ( OPENBLAS_2024_RUNS OPENBLAS_2024_COMPILES
+-        ${CMAKE_CURRENT_BINARY_DIR}
+-        ${ABS_SOURCE_PATH}
+-        LINK_OPTIONS    ${BLAS_LINKER_FLAGS}
+-        LINK_LIBRARIES  ${BLAS_LIBRARIES}
+-        RUN_OUTPUT_VARIABLE OPENBLAS_2024_OUTPUT )
+-
+-    if ( ${OPENBLAS_2024_COMPILES} )
+-        if ( ${OPENBLAS_2024_RUNS} STREQUAL "FAILED_TO_RUN" )
+-            # OpenBLAS compiled but failed to run ... why?
+-            message ( FATAL_ERROR "BLAS: OpenBLAS v0.3.27 or later: failed to run" )
+-        endif ( )
+-        # We have OpenBLAS 0.3.27 or later;
+-        add_compile_definitions ( SUITESPARSE_HAVE_OPENBLAS_SET_NUM_THREADS_LOCAL )
+-        if ( ${OPENBLAS_2024_OUTPUT} EQUAL 1 )
+-            message ( STATUS "BLAS: OpenBLAS v0.3.27 or later: single-threaded" )
+-        else ( )
+-            message ( STATUS "BLAS: OpenBLAS v0.3.27 or later: multi-threaded (threads: ${OPENBLAS_2024_OUTPUT})" )
+-        endif ( )
+-    else ( )
+-        # We have OpenBLAS 0.2.14 to 0.3.26;
+-        # openblas_set_num_threads_local is not available
+-        if ( ${OPENBLAS_2015_OUTPUT} EQUAL 1 )
+-            message ( STATUS "BLAS: OpenBLAS v0.2.14 to v0.3.26: single-threaded" )
+-        else ( )
+-            message ( STATUS "BLAS: OpenBLAS v0.2.14 to v0.3.26: multi-threaded (threads: ${OPENBLAS_2015_OUTPUT})" )
+-        endif ( )
+-    endif ( )
+ endif ( )
+ 
++unset ( CMAKE_REQUIRED_LIBRARIES )
++unset ( CMAKE_REQUIRED_LINK_OPTIONS )
++unset ( CMAKE_REQUIRED_INCLUDES )

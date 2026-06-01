@@ -1,0 +1,55 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7d375a6..eef7bb7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -223,11 +223,11 @@ endif()
+ 
+ configure_file(
+   "${CMAKE_CURRENT_SOURCE_DIR}/src/openjph.pc.in"
+-  "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc"
++  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+   @ONLY
+ )
+ 
+-install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc"
++install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+ )
+ 
+diff --git a/src/core/CMakeLists.txt b/src/core/CMakeLists.txt
+index 0a13d3b..24ccb4f 100644
+--- a/src/core/CMakeLists.txt
++++ b/src/core/CMakeLists.txt
+@@ -137,7 +137,7 @@ endif()
+ ## include library version/name
+ set_target_properties(openjph PROPERTIES POSITION_INDEPENDENT_CODE ON)
+ target_compile_definitions(openjph PUBLIC _FILE_OFFSET_BITS=64)
+-target_include_directories(openjph PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/openjph> $<INSTALL_INTERFACE:include>)
++target_include_directories(openjph PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/openjph> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:include>)
+ 
+ ## This is to check if aligned_alloc or posix_memalign is available
+ # We want the code to compile for C11 and C++11.
+diff --git a/target_arch.cmake b/target_arch.cmake
+index 727b997..50686d9 100644
+--- a/target_arch.cmake
++++ b/target_arch.cmake
+@@ -30,7 +30,7 @@ set(archdetect_c_code "
+ 
+ function(target_architecture output_var)
+ 
+-  file(WRITE "${CMAKE_BINARY_DIR}/arch.c" "${archdetect_c_code}")
++  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/arch.c" "${archdetect_c_code}")
+ 
+   enable_language(C)
+ 
+@@ -45,8 +45,8 @@ function(target_architecture output_var)
+   try_run(
+       run_result_unused
+       compile_result_unused
+-      "${CMAKE_BINARY_DIR}"
+-      "${CMAKE_BINARY_DIR}/arch.c"
++      "${CMAKE_CURRENT_BINARY_DIR}"
++      "${CMAKE_CURRENT_BINARY_DIR}/arch.c"
+       COMPILE_OUTPUT_VARIABLE ARCH
+   )
+ 

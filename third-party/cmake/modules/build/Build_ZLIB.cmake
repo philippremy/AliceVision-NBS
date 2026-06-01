@@ -9,6 +9,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmak
 
 alicevision_integrate_dependency(ZLIB
     SUBMODULE_NAME "zlib"
+    PATCH_STEP
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/zlib-CPack.patch"
     CMAKE_EVAL_CODE
       "set(ZLIB_BUILD_TESTING OFF)"
       "set(ZLIB_BUILD_SHARED ${BUILD_SHARED_LIBS})"

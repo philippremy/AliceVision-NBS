@@ -10,10 +10,12 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmak
 alicevision_integrate_dependency(LZ4
     SUBMODULE_NAME "lz4"
     SOURCE_SUBDIR "build/cmake"
+    PATCH_STEP
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/LZ4-BundledMode-CMakeMinimumRequired.patch"
     CMAKE_EVAL_CODE
       "set(LZ4_BUILD_CLI OFF)"
       "set(LZ4_BUILD_LEGACY_LZ4C OFF)"
-      "set(LZ4_BUNDLED_MODE OFF)"   # Otherwise shared libraries are not available
+      "set(LZ4_BUNDLED_MODE ON)"
       "set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})"
       "set(BUILD_STATIC_LIBS ${BUILD_STATIC_LIBS})"
       "set(LZ4_POSITION_INDEPENDENT_LIB ON)"

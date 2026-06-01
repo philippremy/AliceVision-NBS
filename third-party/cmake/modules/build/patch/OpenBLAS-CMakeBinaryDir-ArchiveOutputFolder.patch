@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8559edef2..8b18e76a5 100644
+index 8559edef2..1fbcbb2aa 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -270,6 +270,12 @@ if(BUILD_STATIC_LIBS)
@@ -15,7 +15,19 @@ index 8559edef2..8b18e76a5 100644
    target_include_directories(${OpenBLAS_LIBNAME}_shared INTERFACE $<INSTALL_INTERFACE:include/openblas${SUFFIX64}>)
    list(APPEND OpenBLAS_LIBS ${OpenBLAS_LIBNAME}_shared)
  endif()
-@@ -320,8 +326,8 @@ if(APPLE AND "${CMAKE_GENERATOR}" MATCHES ".*Makefiles")
+@@ -314,14 +320,19 @@ if(APPLE AND "${CMAKE_GENERATOR}" MATCHES ".*Makefiles")
+   set(CMAKE_C_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+   # Always build static library first
+   if(BUILD_STATIC_LIBS)
+-    set(STATIC_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lib${OpenBLAS_LIBNAME}.a")
++    if(DEFINED CMAKE_BUILD_TYPE)
++      string( TOUPPER ${CMAKE_BUILD_TYPE} OUTPUTCONFIG )
++      set(STATIC_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${OUTPUTCONFIG}/lib${OpenBLAS_LIBNAME}.a")
++    else()
++      set(STATIC_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lib${OpenBLAS_LIBNAME}.a")
++    endif()
+   else()
+     add_library(${OpenBLAS_LIBNAME}_static STATIC ${TARGET_OBJS} ${OpenBLAS_DEF_FILE})
      set(STATIC_PATH "lib${OpenBLAS_LIBNAME}.a")
    endif()
    set(CREATE_STATIC_LIBRARY_COMMAND
@@ -26,7 +38,16 @@ index 8559edef2..8b18e76a5 100644
    if(BUILD_SHARED_LIBS)
      add_dependencies(${OpenBLAS_LIBNAME}_shared ${OpenBLAS_LIBNAME}_static)
      set(SHARED_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libopenblas.${OpenBLAS_MAJOR_VERSION}.${OpenBLAS_MINOR_VERSION}.dylib")
-@@ -645,7 +651,7 @@ set(CMAKE_INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUD
+@@ -333,7 +344,7 @@ if(APPLE AND "${CMAKE_GENERATOR}" MATCHES ".*Makefiles")
+   endif()
+   if(NOT NOFORTRAN)
+     set(CMAKE_Fortran_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+-	set(CMAKE_Fortran_CREATE_STATIC_LIBRARY ${CREATE_STATIC_LIBRARY_COMMAND})
++	  set(CMAKE_Fortran_CREATE_STATIC_LIBRARY ${CREATE_STATIC_LIBRARY_COMMAND})
+     if(BUILD_SHARED_LIBS)
+       set(CMAKE_Fortran_CREATE_SHARED_LIBRARY
+ 	"sh -c 'echo \"\" | ${CMAKE_Fortran_COMPILER} -o dummy.o -c -x f95-cpp-input - '"
+@@ -645,7 +656,7 @@ set(CMAKE_INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUD
  
  message(STATUS "Generating openblas_config.h in ${CMAKE_INSTALL_INCLUDEDIR}")
  
@@ -35,7 +56,7 @@ index 8559edef2..8b18e76a5 100644
  file(WRITE  ${OPENBLAS_CONFIG_H} "#ifndef OPENBLAS_CONFIG_H\n")
  file(APPEND ${OPENBLAS_CONFIG_H} "#define OPENBLAS_CONFIG_H\n")
  file(STRINGS ${PROJECT_BINARY_DIR}/config.h __lines)
-@@ -662,7 +668,7 @@ install (FILES ${OPENBLAS_CONFIG_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+@@ -662,7 +673,7 @@ install (FILES ${OPENBLAS_CONFIG_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
  if(NOT NOFORTRAN)
    message(STATUS "Generating f77blas.h in ${CMAKE_INSTALL_INCLUDEDIR}")
  
@@ -44,7 +65,7 @@ index 8559edef2..8b18e76a5 100644
    file(WRITE  ${F77BLAS_H} "#ifndef OPENBLAS_F77BLAS_H\n")
    file(APPEND ${F77BLAS_H} "#define OPENBLAS_F77BLAS_H\n")
    file(APPEND ${F77BLAS_H} "#include \"openblas_config.h\"\n")
-@@ -674,7 +680,7 @@ endif()
+@@ -674,7 +685,7 @@ endif()
  
  if(NOT NO_CBLAS)
    message (STATUS "Generating cblas.h in ${CMAKE_INSTALL_INCLUDEDIR}")
@@ -53,7 +74,7 @@ index 8559edef2..8b18e76a5 100644
    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/cblas.h CBLAS_H_CONTENTS)
    string(REPLACE "common" "openblas_config" CBLAS_H_CONTENTS_NEW "${CBLAS_H_CONTENTS}")
    if (NOT ${SYMBOLPREFIX} STREQUAL "")
-@@ -705,12 +711,12 @@ if(NOT NO_LAPACKE)
+@@ -705,12 +716,12 @@ if(NOT NO_LAPACKE)
    install (FILES ${INCLUDE_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
  
    ADD_CUSTOM_TARGET(genlapacke
@@ -69,7 +90,7 @@ index 8559edef2..8b18e76a5 100644
    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/lapack-netlib/LAPACKE/include/lapacke.h LAPACKE_H_CONTENTS)
    if (NOT ${SYMBOLPREFIX} STREQUAL "")
  	  string(REGEX REPLACE "(LAPACKE_*)" " ${SYMBOLPREFIX}\\1" LAPACKE_H_CONTENTS_NEW	"${LAPACKE_H_CONTENTS}")
-@@ -729,7 +735,7 @@ if(NOT NO_LAPACKE)
+@@ -729,7 +740,7 @@ if(NOT NO_LAPACKE)
    file(WRITE ${LAPACKE_H} "${LAPACKE_H_CONTENTS_NEW}")
    install (FILES ${LAPACKE_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
    message (STATUS "Generating lapack.h in ${CMAKE_INSTALL_INCLUDEDIR}")

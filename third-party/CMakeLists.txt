@@ -73,6 +73,7 @@ endif()
 # CMP0126: If not set, older projects may overwrite set() calls with set(CACHE)
 # CMP0074: If not set, older projects might ignore <PackageName>_ROOT variables
 # CMP0135: If not set, older project might use wrong download timestamps
+# CMP0168: If not set, older project might use a seperate build for FetchContent
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 cmake_policy(SET CMP0077 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0126 NEW)
@@ -81,6 +82,8 @@ set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 cmake_policy(SET CMP0074 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
 cmake_policy(SET CMP0135 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0168 NEW)
+cmake_policy(SET CMP0168 NEW)
 
 # We don't want the targets found through any find_package() call of a third-
 # party project to be promoted to global scope.
@@ -138,6 +141,11 @@ if(CMAKE_CROSSCOMPILING OR (ALICEVISION_IGNORE_XCODE_PACKAGES AND APPLE))
     )
   endif()
 endif()
+
+# This is an undocumented CPack variable which is used by some projects (oneTBB
+# and lz4 for example) to check whether they should do a include(CPack) calll,
+# which they should *not*. We set it here and unset it at the end of this file.
+set(CPack_CMake_INCLUDED ON)
 
 # =============================================================================
 # zlib
@@ -560,3 +568,6 @@ alicevision_fixup_thirdparty_ide_folder(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Pop the folder for our custom Find*.cmake modules from the CMake module path
 list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/find")
+
+# See above why this is explicitly unset here
+unset(CPack_CMake_INCLUDED)

@@ -121,18 +121,119 @@ endif()
 # Add the dependency management
 add_subdirectory(third-party EXCLUDE_FROM_ALL)
 
-add_executable(main main.cpp)
-target_link_libraries(main PRIVATE
-    ZLIB::ZLIB
-    Boost::filesystem
-    OpenMP::OpenMP_CXX
-    nanoflann::nanoflann
-    expat::expat
-    libdeflate::libdeflate_shared
-    openjph
-    Imath::Imath
-    TBB::tbb
-    OpenEXR::OpenEXR
-    Eigen3::Eigen
-    lz4::lz4
-)
+# Test executable
+#add_executable(main main.cpp)
+#target_link_libraries(main PRIVATE
+#    ZLIB::ZLIB
+#    Boost::filesystem
+#    OpenMP::OpenMP_CXX
+#    nanoflann::nanoflann
+#    expat::expat
+#    libdeflate::libdeflate_static
+#    openjph
+#    Imath::Imath
+#    TBB::tbb
+#    OpenEXR::OpenEXR
+#    Eigen3::Eigen
+#    lz4::lz4
+#    LAPACK::LAPACK
+#    SuiteSparse::SPQR
+#)
+
+# Make an SBOM library
+if(BUILD_SHARED_LIBS)
+
+  add_library(AliceVision_ALL_DEPS SHARED
+    stub.cpp
+  )
+
+  target_link_libraries(AliceVision_ALL_DEPS
+      PUBLIC
+        ZLIB::ZLIB
+        Boost::atomic
+        Boost::container
+        Boost::date_time
+        Boost::graph
+        Boost::headers
+        Boost::json
+        Boost::log
+        Boost::log_setup
+        Boost::program_options
+        Boost::regex
+        Boost::serialization
+        Boost::thread
+        Boost::timer
+        Boost::unit_test_framework
+        OpenMP::OpenMP_CXX
+        nanoflann::nanoflann
+        expat::expat
+        libdeflate_shared
+        openjph
+        Imath::Imath
+        TBB::tbb
+        OpenEXR::OpenEXR
+        OpenColorIO
+        Eigen3::Eigen
+        lz4
+        flann_cpp
+        BLAS::BLAS
+        LAPACK::LAPACK
+        SuiteSparse::AMD
+        SuiteSparse::CAMD
+        SuiteSparse::CCOLAMD
+        SuiteSparse::CHOLMOD
+        SuiteSparse::COLAMD
+        SuiteSparse::SPQR
+  )
+
+elseif(BUILD_STATIC_LIBS)
+
+  add_library(AliceVision_ALL_DEPS SHARED
+      stub.cpp
+  )
+
+  # Force loading all symbols
+  target_link_options(AliceVision_ALL_DEPS
+      PRIVATE -all_load
+  )
+
+  target_link_libraries(AliceVision_ALL_DEPS
+      PUBLIC
+      ZLIB::ZLIBSTATIC
+      Boost::atomic
+      Boost::container
+      Boost::date_time
+      Boost::graph
+      Boost::headers
+      Boost::json
+      Boost::log
+      Boost::log_setup
+      Boost::program_options
+      Boost::regex
+      Boost::serialization
+      Boost::thread
+      Boost::timer
+      Boost::unit_test_framework
+      OpenMP::OpenMP_CXX
+      nanoflann::nanoflann
+      expat::expat
+      libdeflate_static
+      openjph
+      Imath::Imath
+      TBB::tbb
+      OpenEXR::OpenEXR
+      OpenColorIO
+      Eigen3::Eigen
+      lz4_static
+      flann_cpp_s
+      BLAS::BLAS
+      LAPACK::LAPACK
+      SuiteSparse::AMD_static
+      SuiteSparse::CAMD_static
+      SuiteSparse::CCOLAMD_static
+      SuiteSparse::CHOLMOD_static
+      SuiteSparse::COLAMD_static
+      SuiteSparse::SPQR_static
+  )
+
+endif()

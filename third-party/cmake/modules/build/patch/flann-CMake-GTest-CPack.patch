@@ -1,0 +1,201 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f79d173..423b8d3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.10)
+ 
+ if(COMMAND cmake_policy)
+     cmake_policy(SET CMP0003 NEW)
+@@ -28,8 +28,6 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+ # Add an "uninstall" target
+ CONFIGURE_FILE ("${PROJECT_SOURCE_DIR}/cmake/uninstall_target.cmake.in"
+     "${PROJECT_BINARY_DIR}/uninstall_target.cmake" IMMEDIATE @ONLY)
+-ADD_CUSTOM_TARGET (uninstall "${CMAKE_COMMAND}" -P
+-    "${PROJECT_BINARY_DIR}/uninstall_target.cmake")
+ 
+ # Set the build type.  Options are:
+ #  Debug          : w/ debug symbols, w/o optimization
+@@ -125,10 +123,8 @@ endif()
+ 
+ if (USE_OPENMP)
+     find_package(OpenMP)
+-    if(OPENMP_FOUND)
+-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
++    if(OpenMP_FOUND)
++        message(STATUS "OpenMP found")
+     else()
+         message(WARNING "OpenMP NOT found")
+     endif()
+@@ -147,8 +143,7 @@ if (BUILD_CUDA_LIB)
+     endif(CUDA_FOUND)
+ endif(BUILD_CUDA_LIB)
+ 
+-find_package(PkgConfig REQUIRED)
+-pkg_check_modules(LZ4 REQUIRED liblz4)
++find_package(LZ4 REQUIRED)
+ include_directories(${LZ4_INCLUDE_DIRS})
+ 
+ #set the C/C++ include path to the "include" directory
+@@ -221,44 +216,6 @@ install(
+     DESTINATION "${config_install_dir}"
+ )
+ 
+-
+-# CPACK options
+-
+-# RPM
+-find_program(RPM_PROGRAM rpm)
+-if(EXISTS ${RPM_PROGRAM})
+-  list(APPEND CPACK_GENERATOR "RPM")
+-endif(EXISTS ${RPM_PROGRAM})
+-# DEB
+-find_program(DPKG_PROGRAM dpkg)
+-if(EXISTS ${DPKG_PROGRAM})
+-  list(APPEND CPACK_GENERATOR "DEB")
+-endif(EXISTS ${DPKG_PROGRAM})
+-# NSIS
+-find_program(NSIS_PROGRAM makensis MakeNSIS)
+-if(EXISTS ${NSIS_PROGRAM})
+-  list(APPEND CPACK_GENERATOR "NSIS")
+-endif(EXISTS ${NSIS_PROGRAM})
+-# dpkg
+-find_program(PACKAGE_MAKER_PROGRAM PackageMaker
+-	    HINTS /Developer/Applications/Utilities)
+-if(EXISTS ${PACKAGE_MAKER_PROGRAM})
+-  list(APPEND CPACK_GENERATOR "PackageMaker")
+-endif(EXISTS ${PACKAGE_MAKER_PROGRAM})
+-
+-set(CPACK_GENERATOR "${CPACK_GENERATOR}")
+-set(CPACK_MONOLITHIC_INSTALL 1)
+-set(CPACK_SET_DESTDIR ON)
+-include(InstallRequiredSystemLibraries)
+-set(CPACK_PACKAGE_CONTACT "Marius Muja")
+-set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+-SET(CPACK_PACKAGE_VERSION ${FLANN_VERSION})
+-SET(CPACK_PACKAGE_VERSION_MAJOR ${FLANN_VERSION_MAJOR})
+-SET(CPACK_PACKAGE_VERSION_MINOR ${FLANN_VERSION_MINOR})
+-SET(CPACK_PACKAGE_VERSION_PATCH ${FLANN_VERSION_PATCH})
+-include(CPack)
+-
+-
+ message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
+ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+ message(STATUS "Building C bindings: ${BUILD_C_BINDINGS}")
+diff --git a/cmake/flann.pc.in b/cmake/flann.pc.in
+index 07b8d64..7d59d74 100644
+--- a/cmake/flann.pc.in
++++ b/cmake/flann.pc.in
+@@ -8,6 +8,5 @@ Name: @PROJECT_NAME@
+ Description: @PKG_DESC@
+ Version: @FLANN_VERSION@
+ Requires: @PKG_EXTERNAL_DEPS@
+-Libs: -L${libdir} @LZ4_STATIC_LDFLAGS@ -lflann -lflann_cpp
++Libs: -L${libdir} -llz4 -lflann -lflann_cpp
+ Cflags: -I${includedir}
+-
+diff --git a/cmake/flann_utils.cmake b/cmake/flann_utils.cmake
+index e02a6ff..35e935e 100644
+--- a/cmake/flann_utils.cmake
++++ b/cmake/flann_utils.cmake
+@@ -40,69 +40,6 @@ macro(find_hdf5)
+     mark_as_advanced( HDF5_IS_PARALLEL )
+ endmacro(find_hdf5)
+ 
+-
+-# Enable ExternalProject CMake module
+-include(ExternalProject)
+-
+-# Add gtest
+-ExternalProject_Add(
+-    googletest
+-    PREFIX ${CMAKE_BINARY_DIR}/googletest
+-    URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
+-    URL_MD5 2648d4138129812611cf6b6b4b497a3b
+-    TIMEOUT 10
+-    # Force separate output paths for debug and release builds to allow easy
+-    # identification of correct lib in subsequent TARGET_LINK_LIBRARIES commands
+-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+-    # Disable install step
+-    INSTALL_COMMAND ""
+-    # Disable update step
+-    UPDATE_COMMAND ""
+-    # Wrap download, configure and build steps in a script to log output
+-    LOG_DOWNLOAD ON
+-    LOG_CONFIGURE ON
+-    LOG_BUILD ON)
+-set_target_properties(googletest PROPERTIES EXCLUDE_FROM_ALL TRUE)
+-
+-ExternalProject_Get_Property(googletest source_dir)
+-set(googletest_INCLUDE_DIRS ${source_dir}/googletest/include)
+-ExternalProject_Get_Property(googletest binary_dir)
+-set(googletest_LIBRARIES ${binary_dir}/lib/libgtest.a)
+-include_directories(${googletest_INCLUDE_DIRS})
+-
+-
+-macro(flann_add_gtest exe src)
+-    # add build target
+-    add_executable(${exe} EXCLUDE_FROM_ALL ${src})
+-    target_link_libraries(${exe} ${googletest_LIBRARIES} ${ARGN})
+-    # add dependency to 'tests' target
+-    add_dependencies(${exe} googletest)
+-    add_dependencies(flann_gtests ${exe})
+-
+-    # add target for running test
+-    string(REPLACE "/" "_" _testname ${exe})
+-    add_test(
+-        NAME test_${_testname}
+-        COMMAND ${exe} --gtest_print_time
+-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test
+-    )
+-endmacro(flann_add_gtest)
+-
+-macro(flann_add_cuda_gtest exe src)
+-    # add build target
+-    cuda_add_executable(${exe} EXCLUDE_FROM_ALL ${src})
+-    target_link_libraries(${exe} ${googletest_LIBRARIES} ${ARGN})
+-    add_dependencies(${exe} googletest)
+-
+-    # add target for running test
+-    string(REPLACE "/" "_" _testname ${exe})
+-    add_test(
+-        NAME test_${_testname}
+-        COMMAND ${exe} --gtest_print_time
+-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test
+-    )
+-endmacro(flann_add_cuda_gtest)
+-
+ macro(flann_add_pyunit file)
+     # find test file
+     set(_file_name _file_name-NOTFOUND)
+diff --git a/src/cpp/CMakeLists.txt b/src/cpp/CMakeLists.txt
+index 7603abc..e6cc929 100644
+--- a/src/cpp/CMakeLists.txt
++++ b/src/cpp/CMakeLists.txt
+@@ -9,7 +9,10 @@ file(GLOB_RECURSE CPP_SOURCES flann_cpp.cpp)
+ file(GLOB_RECURSE CU_SOURCES *.cu)
+ 
+ add_library(flann_cpp_s STATIC ${CPP_SOURCES})
+-target_link_libraries(flann_cpp_s PUBLIC ${LZ4_LINK_LIBRARIES})
++target_link_libraries(flann_cpp_s PUBLIC lz4::lz4)
++if(OpenMP_FOUND)
++  target_link_libraries(flann_cpp_s PUBLIC OpenMP::OpenMP_CXX)
++endif()
+ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+     set_target_properties(flann_cpp_s PROPERTIES COMPILE_FLAGS -fPIC)
+ endif()
+@@ -20,7 +23,10 @@ else()
+ endif()
+ 
+ add_library(flann_cpp SHARED ${CPP_SOURCES})
+-target_link_libraries(flann_cpp ${LZ4_LINK_LIBRARIES})
++target_link_libraries(flann_cpp PUBLIC lz4::lz4)
++if(OpenMP_FOUND)
++  target_link_libraries(flann_cpp PUBLIC OpenMP::OpenMP_CXX)
++endif()
+ # export lz4 headers, so that MSVC to creates flann_cpp.lib
+ set_target_properties(flann_cpp PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS YES)
+ 

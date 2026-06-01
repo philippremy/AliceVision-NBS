@@ -6,8 +6,12 @@
 
 #include <Eigen/Core>
 
+#include <suitesparse/SuiteSparseQR.hpp>
+
 using namespace std;
 
 int main() {
+
+    auto t = spqr_symbolic();
 
 }

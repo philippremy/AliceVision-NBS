@@ -1,0 +1,22 @@
+diff --git a/build/cmake/CMakeLists.txt b/build/cmake/CMakeLists.txt
+index c372733a..f60ca072 100644
+--- a/build/cmake/CMakeLists.txt
++++ b/build/cmake/CMakeLists.txt
+@@ -8,7 +8,7 @@
+ # For details, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+ 
+ 
+-cmake_minimum_required(VERSION 3.5)
++cmake_minimum_required(VERSION 3.10)
+ 
+ set(LZ4_TOP_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+ 
+@@ -62,7 +62,7 @@ endif(NOT LZ4_BUNDLED_MODE AND NOT CPack_CMake_INCLUDED)
+ # via the BUILD_SHARED_LIBS option unless we are in bundled mode, in
+ # which case we always use static libraries.
+ include(CMakeDependentOption)
+-CMAKE_DEPENDENT_OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON "NOT LZ4_BUNDLED_MODE" OFF)
++OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
+ CMAKE_DEPENDENT_OPTION(BUILD_STATIC_LIBS "Build static libraries" OFF "BUILD_SHARED_LIBS" ON)
+ 
+ if(NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)

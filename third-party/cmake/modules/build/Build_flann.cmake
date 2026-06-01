@@ -9,7 +9,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmak
 
 alicevision_integrate_dependency(flann
     PATCH_STEP
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/flann-cmake.patch"
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/flann-CMake-GTest-CPack.patch"
     CMAKE_EVAL_CODE
       "set(BUILD_C_BINDINGS OFF)"
       "set(BUILD_PYTHON_BINDINGS OFF)"

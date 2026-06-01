@@ -12,6 +12,8 @@
 # Special cases considered:
 # - Windows is more complicated because we need to avoid Fortran (see below)
 # - Create the BLAS::BLAS target and set the BLAS_* variables
+# - Sets AV_BLAS_IS_EMBEDDED, so the project knows that BLAS/LAPACK are built
+# embedded
 # - Create a pkg_redirects file for LAPACK, to ensure that the fresh LAPACK
 #   is used.
 # - Create the LAPACK::LAPACK target and set the LAPACK_* variables
@@ -32,7 +34,7 @@ endif()
 alicevision_integrate_dependency(BLAS
     SUBMODULE_NAME "OpenBLAS"
     PATCH_STEP
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/OpenBLAS-CMakeBinaryDir.patch"
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/OpenBLAS-CMakeBinaryDir-ArchiveOutputFolder.patch"
     CMAKE_EVAL_CODE
       "set(INTERFACE64 OFF)"
       "set(BUILD_WITHOUT_LAPACK OFF)"
@@ -53,16 +55,28 @@ alicevision_integrate_dependency(BLAS
       "set(CPP_THREAD_SAFETY_GEMV OFF)"
       "set(BUILD_STATIC_LIBS ${BUILD_STATIC_LIBS})"
       "set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})"
+      # See the note in Ceres that BLAS/LAPACK cannot be used with threading
+      # enabled because it uses its own threading model which interferes with
+      # the OpenBLAS threading model.
+      "set(USE_THREAD OFF)"
+      "set(USE_OPENMP OFF)"
 )
+
+# Indicate to the project that BLAS is built embedded
+set(AV_BLAS_IS_EMBEDDED ON CACHE INTERNAL "Whether BLAS/LAPACK is built embedded instead of using an externally provided BLAS/LAPACK")
 
 # Add BLAS CMake module compatibility
 if(NOT TARGET BLAS::BLAS)
 
   # Switch on whether the libraries are shared or static
   if(BUILD_SHARED_LIBS)
-    add_library(BLAS::BLAS ALIAS openblas_shared)
+    add_library(__blas_interface INTERFACE)
+    target_link_libraries(__blas_interface INTERFACE openblas_shared)
+    add_library(BLAS::BLAS ALIAS __blas_interface)
   elseif(BUILD_STATIC_LIBS)
-    add_library(BLAS::BLAS ALIAS openblas_static)
+    add_library(__blas_interface INTERFACE)
+    target_link_libraries(__blas_interface INTERFACE openblas_static)
+    add_library(BLAS::BLAS ALIAS __blas_interface)
   endif()
 
   # Add the LAPACK variables which are expected to be available

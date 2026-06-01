@@ -8,6 +8,8 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
 
 alicevision_integrate_dependency(Imath
+    PATCH_STEP
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/Imath-CMakeDebugPostfixNoCacheVar.patch"
     CMAKE_EVAL_CODE
       "set(IMATH_IS_SUBPROJECT ON)"
       "set(IMATH_HALF_USE_LOOKUP_TABLE ON)"

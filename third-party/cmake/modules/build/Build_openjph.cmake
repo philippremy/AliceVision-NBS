@@ -15,7 +15,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmak
 alicevision_integrate_dependency(openjph
     SUBMODULE_NAME "OpenJPH"
     PATCH_STEP
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/openjph-include-dirs.patch"
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/openjph-IncludeDirs-CMakeBinaryDir.patch"
     CMAKE_EVAL_CODE
       "set(OJPH_ENABLE_TIFF_SUPPORT OFF)"   # Only used in Apps, not in the library
       "set(OJPH_BUILD_TESTS OFF)"
