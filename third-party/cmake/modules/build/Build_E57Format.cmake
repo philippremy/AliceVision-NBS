@@ -1,5 +1,5 @@
 # =============================================================================
-# Build_ZLIB.cmake - Integrates an embedded zlib into the project
+# Build_E57Format.cmake - Integrates an embedded E57Format into the project
 #
 # Special cases considered:
 # - Currently none

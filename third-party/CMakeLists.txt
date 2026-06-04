@@ -31,6 +31,39 @@
 #                                         messages for third-party projects
 #                                         (only MSVC/GNU/Clang-compatible
 #                                         compilers are supported).
+# ALICEVISION_FIND_SYSTEM_DEPENDENCIES_VERBOSE: If ON, CMake will call
+#                                               find_package() without the
+#                                               QUIET argument.
+# ALICEVISION_LOG_THIRD_PARTY_CONFIGURE: If ON, CMake will not supress any
+#                                        calls to message() with a level
+#                                        lower than FATAL_ERROR when
+#                                        configuring third-party dependencies.
+# ALICEVISION_NO_FORTRAN: If ON, will instruct CMake to use fallback mechanisms
+#                         for Fortran-related projects (this currently includes
+#                         building LAPACK with a f2c'ed version instead of the
+#                         original Fortran code).
+# ALICEVISION_ALLOW_GPL: If ON, CMake can find/build GPL-licensed code and link
+#                        such code into the project (currently only affects
+#                        SuiteSparse, whose CHOLMOD module contains GPL-
+#                        licensed code.)
+# ALICEVISION_SUITESPARSE_ON_APPLE: If ON, will find/build SuiteSparse on Apple
+#                                   platforms although it is not required, as
+#                                   Apple provides Accelerate.framework with
+#                                   similar functionality.
+# ALICEVISION_OPENBLAS_PREBUILT: If ON (possible on Windows only), CMake will
+#                                fetch pre-built binaries of OpenBLAS instead
+#                                of building OpenBLAS from source.
+# ALICEVISION_USE_C_LAPACK: If ON, CMake will build the LAPACK contained in
+#                           OpenBLAS from f2c'ed C code instead of the original
+#                           Fortran source code. This is forced to ON if
+#                           ALICEVISION_NO_FORTRAN is set to ON.
+# ALICEVISION_IGNORE_XCODE_PACKAGES: If ON, CMake will not look for packages
+#                                    provided by Xcode (e.g., zlib, etc.) which
+#                                    are usually old enough to be incompatible
+#                                    with everything else. An exception is made
+#                                    for Ceres to allow finding the Accelerate
+#                                    framework provided by Apple. This option
+#                                    should technically not be changed.
 # ALICEVISION_DO_AS_I_SAY: If ON, CMake will not prevent some scenarios that
 #                          might break the system. An example would be to
 #                          install third-party projects into a system prefix
@@ -120,6 +153,13 @@ endif()
 
 # Add the folder for our custom Find*.cmake modules to the CMake module path
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/find")
+
+# We have custom *Config.cmake modules for SuiteSparse, so set our folder as
+# a SuiteSparse_DIR variable to be used by CONFIG search mode, if it was not
+# set by the user.
+if(NOT DEFINED SuiteSparse_DIR)
+  set(SuiteSparse_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs")
+endif()
 
 # Frameworks should be searched at the very end, because it might break stuff
 # on Apple platforms (e.g., libPNG links against Homebrew and includes
@@ -355,204 +395,36 @@ alicevision_ensure_dependency(LAPACK
 # SuiteSparse
 # (Version compatibility: SameMajorVersion)
 #
+# NOTE:
+# SuiteSparse contains GPL-licensed code modules (CHOLMOD), so it will neither
+# be searched nor built if the user did not explicitly allow GPL licensed code.
+#
 # Dependencies: BLAS/LAPACK
 # =============================================================================
-alicevision_ensure_dependency(SuiteSparse
-    VERSION 4.5.6
-    ALLOW_CMAKE_MODULE
-    COMPONENTS
-      AMD
-      CAMD
-      CCOLAMD
-      CHOLMOD
-      COLAMD
-      SPQR
+if(ALICEVISION_ALLOW_GPL AND (NOT APPLE OR ALICEVISION_SUITESPARSE_ON_APPLE))
+  alicevision_ensure_dependency(SuiteSparse
+      VERSION 4.5.6
+      ALLOW_CMAKE_MODULE
+      COMPONENTS
+        AMD
+        CAMD
+        CCOLAMD
+        COLAMD
+        CHOLMOD
+        SPQR
+  )
+endif()
+
+# =============================================================================
+# Ceres
+# (Version compatibility: SameMajorVersion)
+#
+# Dependencies: Eigen, BLAS/LAPACK, (SuiteSparse/Accelerate.framework)
+# =============================================================================
+alicevision_ensure_dependency(Ceres
+  VERSION 2
+  LEGACY_SUPPORT_VERSION 1.10.0
 )
-
-# =============================================================================
-# CoinUtils
-# (Version compatibility: Unknown, suspecting SameMajorVersion)
-#
-# Dependencies: BLAS
-# =============================================================================
-#alicevision_ensure_dependency(CoinUtils
-#    VERSION 2.9.3...<3
-#    ALLOW_CMAKE_MODULE
-#)
-
-# =============================================================================
-# Osi
-# (Version compatibility: Unknown, suspecting SameMajorVersion)
-#
-# Dependencies: CoinUtils
-# =============================================================================
-#alicevision_ensure_dependency(Osi
-#    VERSION ...<1
-#    ALLOW_CMAKE_MODULE
-#)
-
-# =============================================================================
-# Clp
-# (Version compatibility: Unknown, suspecting SameMajorVersion)
-#
-# Dependencies: CoinUtils, Osi
-# =============================================================================
-#alicevision_ensure_dependency(Clp
-#    VERSION 1...<2
-#    ALLOW_CMAKE_MODULE
-#)
-
-# =============================================================================
-# LEMON
-# (Version compatibility: Unknown, suspecting SameMajorVersion)
-#
-# Dependencies: None
-# =============================================================================
-#alicevision_ensure_dependency(LEMON
-#    VERSION 1.3...<2
-#)
-
-# =============================================================================
-# Xerces-C
-# (Version compatibility: SameMajorVersion)
-#
-# Dependencies: Threads
-# =============================================================================
-#alicevision_ensure_dependency(XercesC
-#    VERSION 3.2...<4
-#)
-
-# =============================================================================
-# E57Format
-# (Version compatibility: SameMajorVersion)
-#
-# Dependencies: Xerces-C, Threads
-# =============================================================================
-#alicevision_ensure_dependency(E57Format)
-
-# =============================================================================
-# Assimp
-# (Version compatibility: SameMajorVersion)
-#
-# NOTE:
-# Assimp only supports SameMajorVersion increments, but support for Assimp > 6
-# is verified for this project. No other dependency requires Assimp.
-#
-# Dependencies: Threads
-# =============================================================================
-#alicevision_ensure_dependency(Assimp
-#    VERSION 5.0.0...<=6.0.5
-#)
-
-# =============================================================================
-# Alembic
-# (Version compatibility: AnyNewerVersion)
-#
-# Dependencies: Threads
-# =============================================================================
-#alicevision_ensure_dependency(Alembic
-#    VERSION 1.7.0...
-#)
-
-# =============================================================================
-# libTIFF
-# (Version compatibility: SameMajorVersion)
-#
-# Dependencies: Threads
-# =============================================================================
-#alicevision_ensure_dependency(TIFF
-#    VERSION 4.0...<=5
-#    ALLOW_CMAKE_MODULE
-#)
-
-# =============================================================================
-# libjpeg-turbo
-# (Version compatibility: AnyNewerVersion)
-#
-# Dependencies: zlib
-# =============================================================================
-#alicevision_ensure_dependency(libjpeg-turbo
-#    VERSION 2.1...
-#)
-
-# =============================================================================
-# libPNG
-# (Version compatibility: SameMinorVersion)
-#
-# NOTE:
-# Although libPNG only supports API/ABI compatibility for same minor versions,
-# OpenImageIO explicitly tests and supports libPNG 1.6...1.6.56.
-#
-# Dependencies: zlib
-# =============================================================================
-#alicevision_ensure_dependency(PNG
-#    VERSION 1.6
-#    ALLOW_CMAKE_MODULE
-#)
-
-# =============================================================================
-# libRAW
-# (Version compatibility: AnyNewerVersion)
-#
-# Dependencies: zlib, JPEG, (OpenMP)
-# =============================================================================
-#alicevision_ensure_dependency(libraw
-#    VERSION 0.20...
-#)
-
-# =============================================================================
-# OpenJPEG
-# (Version compatibility: SameMajorVersion)
-#
-# Dependencies: None
-# =============================================================================
-#alicevision_ensure_dependency(OpenJPEG
-#    VERSION 2.0...<3
-#)
-
-# =============================================================================
-# GIFLIB
-# (Version compatibility: Unknown, suspecting SameMajorVersion)
-#
-# NOTE:
-# Although GIFLIB likely is only ABI/API compatible between major versions,
-# OpenImageIO tests and supports GIFLIB versions 5.0...<=6.1.3.
-#
-# Dependencies: None
-# =============================================================================
-#alicevision_ensure_dependency(GIF
-#    VERSION 5.0...<=6.1.3
-#    ALLOW_CMAKE_MODULE
-#)
-
-# =============================================================================
-# libheif: TODO
-# =============================================================================
-
-# =============================================================================
-# WebP
-# (Version compatibility: Unknown, AnyNewerVersion)
-#
-# Dependencies: None
-# =============================================================================
-#alicevision_ensure_dependency(WebP
-#    VERSION 1.1...
-#)
-
-# =============================================================================
-# libjxl: TODO
-# =============================================================================
-
-# =============================================================================
-# OpenImageIO
-# (Version compatibility: SameMajorVersion)
-#
-# Dependencies: Imath, OpenEXR, libTIFF, OpenColorIO, libjpeg-turbo, zlib,
-# (libPNG, libraw, OpenJPEG, TBB/oneTBB, GIFLIB, libheif, WebP, libjxl)
-# =============================================================================
-#alicevision_ensure_dependency(OpenImageIO
-#    VERSION 3.0.0...<4
-#)
 
 # =============================================================================
 # Fixup targets to be under out third-party folder in IDEs

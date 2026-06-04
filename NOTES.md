@@ -21,4 +21,4 @@ endif ( )
 
 ### OpenBLAS / SuiteSparse Integer Size
 
-Currently, we set the BLAS/LAPACK integer size to 8 (64-bit). This might cause incompatibilities with Ceres, must check!
+We always build OpenBLAS with an integer size of 4.

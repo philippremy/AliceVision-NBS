@@ -52,3 +52,6 @@
 [submodule "third-party/SuiteSparse"]
 	path = third-party/SuiteSparse
 	url = https://github.com/DrTimothyAldenDavis/SuiteSparse.git
+[submodule "third-party/ceres-solver"]
+	path = third-party/ceres-solver
+	url = https://ceres-solver.googlesource.com/ceres-solver

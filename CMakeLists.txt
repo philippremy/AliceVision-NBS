@@ -11,13 +11,15 @@ option(ALICEVISION_ALLOW_SYSTEM_DEPENDENCIES "Allow finding dependencies externa
 option(ALICEVISION_FIND_SYSTEM_DEPENDENCIES_VERBOSE "When finding system-provided dependencies do not pass QUIET to find_package()" OFF)
 option(ALICEVISION_IGNORE_XCODE_PACKAGES "Ignores packages provided by Xcode (e.g., zlib, liblzma, etc.) which are usually too old" ON)
 option(ALICEVISION_PRINT_THIRD_PARTY_WARNINGS "Print compiler warnings for any third-party projects" OFF)
-option(ALICEVISION_DO_AS_I_SAY "Prevent CMake from ensuring you are not breaking your system (DANGEROUS!)" OFF)
+option(ALICEVISION_DO_AS_I_SAY "Prevent CMake from ensuring you are not breaking your system or accidentially including GPL-licensed code in a distributable package (DANGEROUS!)" OFF)
 option(ALICEVISION_LOG_THIRD_PARTY_CONFIGURE "Show configure logs of third-party projects" OFF)
 option(ALICEVISION_NO_FORTRAN "Do not use Fortran as a language" OFF)
+option(ALICEVISION_ALLOW_GPL "Allows using GPL-licensed code from external dependencies, but makes this build undistributable" ON)
+option(ALICEVISION_SUITESPARSE_ON_APPLE "Forces usage of SuiteSparse on Apple platforms (Apple has Accelerate.framework for the same functionality, so only turn ON for good reason!)" ON)  # TODO: Turn OFF by default
 
 # Specific dependency options
 include(CMakeDependentOption)
-cmake_dependent_option(ALICEVISION_OPENBLAS_PREBUILT "Whether to use pre-built binaries for BLAS/LAPACK on Windows" OFF WIN32 OFF)
+cmake_dependent_option(ALICEVISION_OPENBLAS_PREBUILT "Whether to use pre-built binaries for BLAS/LAPACK on Windows" OFF "WIN32 AND NOT CMAKE_CROSSCOMPILING" OFF)
 if(WIN32)
   option(ALICEVISION_USE_C_LAPACK ON "Whether to use the f2c'ed (C) version of LAPACK when building an embedded LAPACK")
 else()
@@ -40,12 +42,8 @@ option(ALICEVISION_FORCE_BUILD_LZ4 OFF "Force build LZ4")
 option(ALICEVISION_FORCE_BUILD_flann OFF "Force build flann")
 option(ALICEVISION_FORCE_BUILD_BLAS OFF "Force build BLAS")
 option(ALICEVISION_FORCE_BUILD_LAPACK OFF "Force build LAPACK")
-option(ALICEVISION_FORCE_BUILD_CoinUtils OFF "Force build CoinUtils")
-option(ALICEVISION_FORCE_BUILD_Clp OFF "Force build Clp")
-option(ALICEVISION_FORCE_BUILD_Osi OFF "Force build Osi")
-option(ALICEVISION_FORCE_BUILD_LEMON OFF "Force build LEMON")
-option(ALICEVISION_FORCE_BUILD_XercesC OFF "Force build XercesC")
-option(ALICEVISION_FORCE_BUILD_E57Format OFF "Force build E57Format")
+option(ALICEVISION_FORCE_BUILD_SuiteSparse OFF "Force build LAPACK")
+option(ALICEVISION_FORCE_BUILD_Ceres OFF "Force build LAPACK")
 
 # Default to shared libraries
 if(NOT DEFINED BUILD_SHARED_LIBS)
@@ -101,6 +99,12 @@ if(ALICEVISION_NO_FORTRAN)
   set(ALICEVISION_USE_C_LAPACK ON CACHE BOOL "Whether to use the f2c'ed (C) version of LAPACK when building an embedded LAPACK (force enabled because Fortran was disabled by the user)" FORCE)
 endif()
 
+# We emit a warning if the user disallowed GPL code but allowed external
+# dependencies
+if(NOT ALICEVISION_ALLOW_GPL AND ALICEVISION_ALLOW_SYSTEM_DEPENDENCIES)
+  message(WARNING "GPL code is not allowed, but CMake is allowed to look for external dependencies! We cannot ensure that no GPL-licensed code will be picked up along the way by means of transitive dependencies. This build will not be redistributable by default unless you specify ALICEVISION_DO_AS_I_SAY.")
+endif()
+
 # Project call after determining Apple quirks
 project(AliceVision LANGUAGES C CXX)
 
@@ -120,25 +124,6 @@ endif()
 
 # Add the dependency management
 add_subdirectory(third-party EXCLUDE_FROM_ALL)
-
-# Test executable
-#add_executable(main main.cpp)
-#target_link_libraries(main PRIVATE
-#    ZLIB::ZLIB
-#    Boost::filesystem
-#    OpenMP::OpenMP_CXX
-#    nanoflann::nanoflann
-#    expat::expat
-#    libdeflate::libdeflate_static
-#    openjph
-#    Imath::Imath
-#    TBB::tbb
-#    OpenEXR::OpenEXR
-#    Eigen3::Eigen
-#    lz4::lz4
-#    LAPACK::LAPACK
-#    SuiteSparse::SPQR
-#)
 
 # Make an SBOM library
 if(BUILD_SHARED_LIBS)
@@ -178,12 +163,13 @@ if(BUILD_SHARED_LIBS)
         flann_cpp
         BLAS::BLAS
         LAPACK::LAPACK
-        SuiteSparse::AMD
-        SuiteSparse::CAMD
-        SuiteSparse::CCOLAMD
-        SuiteSparse::CHOLMOD
-        SuiteSparse::COLAMD
-        SuiteSparse::SPQR
+        $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::AMD>
+        $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::CAMD>
+        $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::CCOLAMD>
+        $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::CHOLMOD>
+        $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::COLAMD>
+        $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::SPQR>
+        Ceres::ceres
   )
 
 elseif(BUILD_STATIC_LIBS)
@@ -228,12 +214,42 @@ elseif(BUILD_STATIC_LIBS)
       flann_cpp_s
       BLAS::BLAS
       LAPACK::LAPACK
-      SuiteSparse::AMD_static
-      SuiteSparse::CAMD_static
-      SuiteSparse::CCOLAMD_static
-      SuiteSparse::CHOLMOD_static
-      SuiteSparse::COLAMD_static
-      SuiteSparse::SPQR_static
+      $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::AMD_static>
+      $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::CAMD_static>
+      $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::CCOLAMD_static>
+      $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::CHOLMOD_static>
+      $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::COLAMD_static>
+      $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::SPQR_static>
+      Ceres::ceres
   )
 
 endif()
+
+
+set(AV_INPUT_FILE $<TARGET_FILE:AliceVision_ALL_DEPS>)
+install(CODE "
+message(STATUS \"Gathering runtime dependencies required by ${AV_INPUT_FILE}...\")
+
+file(GET_RUNTIME_DEPENDENCIES
+    RESOLVED_DEPENDENCIES_VAR RESOLVED
+    UNRESOLVED_DEPENDENCIES_VAR UNRESOLVED
+    LIBRARIES ${AV_INPUT_FILE}
+)
+
+message(STATUS \"### Report for ${AV_INPUT_FILE} ###\")
+message(STATUS \"\")
+
+foreach(RESOLVED_LIB IN LISTS RESOLVED)
+  message(STATUS \"  Resolved: \${RESOLVED_LIB}\")
+endforeach()
+
+message(STATUS \"\")
+
+foreach(UNRESOLVED_LIB IN LISTS UNRESOLVED)
+  message(STATUS \"  Unresolved: \${UNRESOLVED_LIB}\")
+endforeach()
+
+message(STATUS \"\")
+
+message(STATUS \"### End report for \${AV_INPUT_FILE} ###\")
+")
