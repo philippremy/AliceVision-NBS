@@ -176,7 +176,7 @@ endmacro()
 function(alicevision_ensure_dependency AV_DEP_NAME)
 
   cmake_parse_arguments(AV_DEP
-      "ALLOW_CMAKE_MODULE"
+      "ALLOW_CMAKE_MODULE;NO_CONFIG"
       "LEGACY_SUPPORT_VERSION;VERSION"
       "COMPONENTS;ALTERNATIVE_PACKAGE_NAMES"
       ${ARGN}
@@ -205,24 +205,26 @@ function(alicevision_ensure_dependency AV_DEP_NAME)
       OR AV_DEP_BLAS_LAPACK_SHORT_CIRCUIT
   )
 
-    # Pass 1: Prefer CONFIG mode (supports NAMES for alternative config package names).
-    _alicevision_build_find_package_args(${AV_DEP_NAME}_FIND_PKG_ARGS "${AV_DEP_NAME}" "CONFIG" "${AV_DEP_VERSION}")
-    message(TRACE "[alicevision_ensure_dependency] Trying to find dependency externally (CONFIG) with call: find_package(${${AV_DEP_NAME}_FIND_PKG_ARGS})")
+    if(NOT AV_DEP_NO_CONFIG)
+      # Pass 1: Prefer CONFIG mode (supports NAMES for alternative config package names).
+      _alicevision_build_find_package_args(${AV_DEP_NAME}_FIND_PKG_ARGS "${AV_DEP_NAME}" "CONFIG" "${AV_DEP_VERSION}")
+      message(TRACE "[alicevision_ensure_dependency] Trying to find dependency externally (CONFIG) with call: find_package(${${AV_DEP_NAME}_FIND_PKG_ARGS})")
 
-    # We want to disable CMake Warning (dev) about case mismatches unless the
-    # caller opted for a non-quiet search.
-    if(NOT ALICEVISION_FIND_SYSTEM_DEPENDENCIES_VERBOSE)
-      cmake_language(GET_MESSAGE_LOG_LEVEL AV_GLOBAL_LOG_LEVEL)
-      set(CMAKE_MESSAGE_LOG_LEVEL "ERROR" CACHE STRING "The CMake Message log level" FORCE)
+      # We want to disable CMake Warning (dev) about case mismatches unless the
+      # caller opted for a non-quiet search.
+      if(NOT ALICEVISION_FIND_SYSTEM_DEPENDENCIES_VERBOSE)
+        cmake_language(GET_MESSAGE_LOG_LEVEL AV_GLOBAL_LOG_LEVEL)
+        set(CMAKE_MESSAGE_LOG_LEVEL "ERROR" CACHE STRING "The CMake Message log level" FORCE)
+      endif()
+
+      # Execute the call
+      find_package(${${AV_DEP_NAME}_FIND_PKG_ARGS})
     endif()
-
-    # Execute the call
-    find_package(${${AV_DEP_NAME}_FIND_PKG_ARGS})
 
     # Pass 2 (optional): If CONFIG lookup failed and caller allows it,
     # try MODULE-only lookup without NAMES (so Find<Package>.cmake can be found).
     string(TOUPPER ${AV_DEP_NAME} AV_DEP_NAME_UPPERCASE)
-    if(NOT (${AV_DEP_NAME}_FOUND OR ${AV_DEP_NAME_UPPERCASE}_FOUND) AND AV_DEP_ALLOW_CMAKE_MODULE)
+    if(AV_DEP_NO_CONFIG OR (NOT (${AV_DEP_NAME}_FOUND OR ${AV_DEP_NAME_UPPERCASE}_FOUND) AND AV_DEP_ALLOW_CMAKE_MODULE))
       _alicevision_build_find_package_args(${AV_DEP_NAME}_FIND_PKG_ARGS "${AV_DEP_NAME}" "MODULE" "${AV_DEP_VERSION}")
       message(TRACE "[alicevision_ensure_dependency] Trying to find dependency externally (MODULE) with call: find_package(${${AV_DEP_NAME}_FIND_PKG_ARGS})")
       find_package(${${AV_DEP_NAME}_FIND_PKG_ARGS})

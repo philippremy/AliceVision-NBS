@@ -9,9 +9,10 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmak
 
 alicevision_integrate_dependency(Imath
     PATCH_STEP
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/Imath-CMakeDebugPostfixNoCacheVar.patch"
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/Imath-CMakeDebugPostfix-IncludeDirs.patch"
     CMAKE_EVAL_CODE
       "set(IMATH_IS_SUBPROJECT ON)"
       "set(IMATH_HALF_USE_LOOKUP_TABLE ON)"
       "set(IMATH_INSTALL_PKG_CONFIG ${ALICEVISION_INSTALL_THIRD_PARTY})"
+      "set(IMATH_INSTALL ${ALICEVISION_INSTALL_THIRD_PARTY})"
 )

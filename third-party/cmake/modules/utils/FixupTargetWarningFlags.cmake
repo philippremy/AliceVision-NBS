@@ -28,8 +28,20 @@ function(alicevision_ensure_target_nowarn AV_START_FOLDER)
     # C/C++
     if(MSVC OR (CMAKE_C_COMPILER_ID MATCHES "(GNU|AppleClang|Clang)" AND CMAKE_CXX_COMPILER_ID MATCHES "(GNU|AppleClang|Clang)"))
       target_compile_options(${AV_TARGET}
-          PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:$<IF:$<BOOL:${MSVC}>,/W0,-w>>
+          PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:$<IF:$<BOOL:${MSVC}>,/w,-w>>
       )
+      # We must also strip away any existing /W directives on MSVC or it will
+      # bother us with:
+      # "Command line warning D9025 : overriding '/W3' with '/W0'"
+      if(MSVC)
+        list(FILTER CMAKE_C_FLAGS EXCLUDE REGEX "^/(Wall|WX|[Ww][0-4])$")
+        list(FILTER CMAKE_CXX_FLAGS EXCLUDE REGEX "^/(Wall|WX|[Ww][0-4])$")
+        get_target_property(AV_TARGET_COMPILE_OPTIONS ${AV_TARGET} COMPILE_OPTIONS)
+        if(AV_TARGET_COMPILE_OPTIONS)
+          list(FILTER AV_TARGET_COMPILE_OPTIONS EXCLUDE REGEX "^/(Wall|WX|[Ww][0-4])$")
+          set_target_properties(${AV_TARGET} PROPERTIES COMPILE_OPTIONS "${AV_TARGET_COMPILE_OPTIONS}")
+        endif()
+      endif()
       message(TRACE "[alicevision_ensure_target_nowarn] Fixed C/C++ warnings on target: ${AV_TARGET}")
     endif()
 

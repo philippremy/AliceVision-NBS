@@ -2,14 +2,14 @@
 # Build_OpenColorIO.cmake - Integrates an embedded OpenColorIO into the project
 #
 # Special cases considered:
-# - Currently none
+# - Create the OpenColorIO::OpenColorIO target, if it does not exist
 # =============================================================================
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
 
 alicevision_integrate_dependency(OpenColorIO
     PATCH_STEP
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/OpenColorIO-sse2neonBaseDir-CMakeBinaryDir.patch"
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/OpenColorIO-sse2neonBaseDir-CMakeBinaryDir-MSVCIntrinsics.patch"
     CMAKE_EVAL_CODE
       "set(OCIO_BUILD_APPS OFF)"
       "set(OCIO_BUILD_OPENFX OFF)"
@@ -30,3 +30,7 @@ alicevision_integrate_dependency(OpenColorIO
       "set(OCIO_VULKAN_ENABLED OFF)"
       "set(OCIO_INSTALL_EXT_PACKAGES MISSING)"
 )
+
+if(NOT TARGET OpenColorIO::OpenColorIO)
+  add_library(OpenColorIO::OpenColorIO ALIAS OpenColorIO)
+endif()

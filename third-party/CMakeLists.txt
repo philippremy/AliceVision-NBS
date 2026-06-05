@@ -131,7 +131,7 @@ set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL OFF)
 if(NOT ALICEVISION_PRINT_THIRD_PARTY_WARNINGS)
   if(MSVC OR (CMAKE_C_COMPILER_ID MATCHES "(GNU|AppleClang|Clang)" AND CMAKE_CXX_COMPILER_ID MATCHES "(GNU|AppleClang|Clang)"))
     set_directory_properties(
-        PROPERTIES COMPILE_OPTIONS $<$<COMPILE_LANGUAGE:C,CXX>:$<IF:$<BOOL:${MSVC}>,/W0,-w>>
+        PROPERTIES COMPILE_OPTIONS $<$<COMPILE_LANGUAGE:C,CXX>:$<IF:$<BOOL:${MSVC}>,/w,-w>>
     )
     message(STATUS "C/C++ Compiler warnings for third-party projects will be suppressed.")
   else()
@@ -382,12 +382,20 @@ alicevision_ensure_dependency(flann
 # (Open)BLAS/(Open)LAPACK
 # (Version compatibility: All)
 #
+# NOTE:
+# We cannot allow CONFIG mode, because (for example) Netlib BLAS/LAPACK does
+# not expose the target as LAPACK::LAPACK, but instead simply uses lapack.
+# If we always use MODULE mode, we can ensure maximum compatibility between
+# all platforms, regardless of the installed BLAS/LAPACK.
+#
 # Dependencies: None
 # =============================================================================
 alicevision_ensure_dependency(BLAS
+    NO_CONFIG
     ALLOW_CMAKE_MODULE
 )
 alicevision_ensure_dependency(LAPACK
+    NO_CONFIG
     ALLOW_CMAKE_MODULE
 )
 

@@ -67,8 +67,6 @@ function(alicevision_integrate_dependency AV_DEP_NAME)
       set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH ${CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH})
     endif()
 
-    list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "UPDATE_DISCONNECTED")
-    list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "1")
     list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "PATCH_COMMAND")
     list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED
       # Fixes the target_include_dir call for openjph to match an installed layout
@@ -76,7 +74,7 @@ function(alicevision_integrate_dependency AV_DEP_NAME)
         -DPATCH_WORKDIR=${AV_DEP_SOURCE_DIR}
         -DPATCH_FILE=${AV_DEP_PATCH_STEP}
         -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
-        -DQUIET=ON
+        -DQUIET=OFF
         -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/ApplyGitPatchSafe.cmake
     )
     message(TRACE "[alicevision_integrate_dependency] Generated patch step args: ${AV_DEP_PATCH_STEP_FC_EXPANDED}")

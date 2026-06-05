@@ -152,15 +152,15 @@ if(BUILD_SHARED_LIBS)
         OpenMP::OpenMP_CXX
         nanoflann::nanoflann
         expat::expat
-        libdeflate_shared
+        libdeflate::libdeflate_shared
         openjph
         Imath::Imath
         TBB::tbb
         OpenEXR::OpenEXR
-        OpenColorIO
+        OpenColorIO::OpenColorIO
         Eigen3::Eigen
-        lz4
-        flann_cpp
+        lz4::lz4
+        flann::flann_cpp
         BLAS::BLAS
         LAPACK::LAPACK
         $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::AMD>
@@ -203,15 +203,15 @@ elseif(BUILD_STATIC_LIBS)
       OpenMP::OpenMP_CXX
       nanoflann::nanoflann
       expat::expat
-      libdeflate_static
+      libdeflate::libdeflate_static
       openjph
       Imath::Imath
       TBB::tbb
       OpenEXR::OpenEXR
-      OpenColorIO
+      OpenColorIO::OpenColorIO
       Eigen3::Eigen
-      lz4_static
-      flann_cpp_s
+      lz4::lz4
+      flann::flann_cpp_s
       BLAS::BLAS
       LAPACK::LAPACK
       $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::AMD_static>

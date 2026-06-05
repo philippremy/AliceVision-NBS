@@ -1,0 +1,26 @@
+diff --git a/config/ImathSetup.cmake b/config/ImathSetup.cmake
+index ceb73e4..8ed81b0 100644
+--- a/config/ImathSetup.cmake
++++ b/config/ImathSetup.cmake
+@@ -59,7 +59,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ 
+ # Suffix for debug configuration libraries (if you should choose to
+ # install those)
+-set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Suffix for debug builds")
++set(CMAKE_DEBUG_POSTFIX "_d")
+ 
+ # Usual cmake option to build shared libraries or not
+ option(BUILD_SHARED_LIBS "Build shared library" ON)
+diff --git a/src/Imath/CMakeLists.txt b/src/Imath/CMakeLists.txt
+index 2d4f8cb..50bf9e5 100644
+--- a/src/Imath/CMakeLists.txt
++++ b/src/Imath/CMakeLists.txt
+@@ -107,7 +107,7 @@ endif()
+ 
+ set_property(TARGET ${IMATH_LIBRARY} PROPERTY PUBLIC_HEADER ${IMATH_HEADERS})
+ 
+-target_include_directories(${IMATH_LIBRARY} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
++target_include_directories(${IMATH_LIBRARY} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
+ 
+ #
+ # Link options

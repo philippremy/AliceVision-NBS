@@ -2,7 +2,7 @@
 # Build_flann.cmake - Integrates an embedded flann into the project
 #
 # Special cases considered:
-# - Currently none
+# - Create flann::flann_cpp(_s) target if it does not exist
 # =============================================================================
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
@@ -23,3 +23,13 @@ alicevision_integrate_dependency(flann
       "set(HDF5_FOUND OFF)"
       "set(HDF5_IS_PARALLEL OFF)"
 )
+
+if(BUILD_SHARED_LIBS)
+  if(NOT TARGET flann::flann_cpp)
+    add_library(flann::flann_cpp ALIAS flann_cpp)
+  endif()
+else()
+  if(NOT TARGET flann::flann_cpp_s)
+    add_library(flann::flann_cpp_s ALIAS flann_cpp_s)
+  endif()
+endif()

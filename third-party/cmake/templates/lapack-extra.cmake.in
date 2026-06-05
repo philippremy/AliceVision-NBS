@@ -1,0 +1,49 @@
+# =============================================================================
+# lapack-extra.cmake - This file helps creating the LAPACK targets and
+# variables on Windows if ALICEVISION_OPENBLAS_PREBUILT is set.
+# =============================================================================
+
+if(NOT TARGET LAPACK::LAPACK)
+
+    if(NOT WIN32)
+        message(FATAL_ERROR "Unable to use lapack-extra.cmake on a platform other than Windows!")
+    endif()
+
+    # The behavior differs between Windows on ARM and x86_64 Windows
+    # x86_64 Windows also has the libraries prefixed with "lib"
+
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "(AMD64|IA64)")
+        if(BUILD_SHARED_LIBS)
+            add_library(LAPACK::LAPACK SHARED IMPORTED GLOBAL)
+            set_target_properties(LAPACK::LAPACK PROPERTIES
+                IMPORTED_IMPLIB "@PROJECT_BINARY_DIR@/_deps/blas-src/lib/libopenblas.lib"
+                IMPORTED_LOCATION "@PROJECT_BINARY_DIR@/_deps/blas-src/bin/libopenblas.dll"
+            )
+            set(LAPACK_LIBRARIES "@PROJECT_BINARY_DIR@/_deps/blas-src/lib/libopenblas.lib" CACHE STRING "The LAPACK libraries" FORCE)
+            set(ENV{PATH} "@PROJECT_BINARY_DIR@/_deps/blas-src/bin;$ENV{PATH}")
+        else()
+            add_library(LAPACK::LAPACK STATIC IMPORTED GLOBAL)
+            set_target_properties(LAPACK::LAPACK PROPERTIES
+                IMPORTED_LOCATION "@PROJECT_BINARY_DIR@/_deps/blas-src/bin/libopenblas.a"
+            )
+            set(LAPACK_LIBRARIES "@PROJECT_BINARY_DIR@/_deps/blas-src/lib/libopenblas.a" CACHE STRING "The LAPACK libraries" FORCE)
+        endif()
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64")
+        if(BUILD_SHARED_LIBS)
+            add_library(LAPACK::LAPACK SHARED IMPORTED GLOBAL)
+            set_target_properties(LAPACK::LAPACK PROPERTIES
+                IMPORTED_IMPLIB "@PROJECT_BINARY_DIR@/_deps/blas-src/lib/openblas.lib"
+                IMPORTED_LOCATION "@PROJECT_BINARY_DIR@/_deps/blas-src/bin/openblas.dll"
+            )
+            set(LAPACK_LIBRARIES "@PROJECT_BINARY_DIR@/_deps/blas-src/lib/openblas.lib" CACHE STRING "The LAPACK libraries" FORCE)
+            set(ENV{PATH} "@PROJECT_BINARY_DIR@/_deps/blas-src/bin;$ENV{PATH}")
+        else()
+            add_library(LAPACK::LAPACK STATIC IMPORTED GLOBAL)
+            set_target_properties(LAPACK::LAPACK PROPERTIES
+                IMPORTED_LOCATION "@PROJECT_BINARY_DIR@/_deps/blas-src/lib/openblas.lib"
+            )
+            set(LAPACK_LIBRARIES "@PROJECT_BINARY_DIR@/_deps/blas-src/lib/openblas.lib" CACHE STRING "The LAPACK libraries" FORCE)
+        endif()
+    endif()
+
+endif()

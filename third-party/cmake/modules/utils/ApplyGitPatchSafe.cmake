@@ -65,23 +65,30 @@ function(_run_git out_var)
     )
   endif()
   set(${out_var} "${_rv}" PARENT_SCOPE)
+  set(${out_var}_ERR "${_err}" PARENT_SCOPE)
 endfunction()
 
 # 1) Is it already applied?
-_run_git(_rv_rev apply --reverse --check "${_patch}")
+_run_git(_rv_rev apply --ignore-whitespace --reverse --check "${_patch}")
 if(_rv_rev EQUAL 0)
-  # already applied
+  message(TRACE "[ApplyGitPatchSafe] Patch already applied")
   return()
 endif()
 
 # 2) Can it be applied?
-_run_git(_rv_chk apply --check "${_patch}")
+_run_git(_rv_chk apply --ignore-whitespace --check "${_patch}")
 if(NOT _rv_chk EQUAL 0)
   # can't apply (changed sources etc.) -> succeed silently
+  message(TRACE "[ApplyGitPatchSafe] Patch cannot be applied")
   return()
 endif()
 
 # 3) Apply it
-_run_git(_rv_apply apply "${_patch}")
-# If apply unexpectedly fails, still succeed silently per your request.
+_run_git(_rv_apply apply --ignore-whitespace "${_patch}")
+
+if(NOT _rv_apply EQUAL 0)
+  message(FATAL_ERROR
+    "[ApplyGitPatchSafe] Failed to apply patch: ${_patch}\n${_rv_apply_ERR}")
+endif()
+
 return()

@@ -203,6 +203,8 @@ applied per component, plus patches and extra behavior.
   - `OCIO_DIRECTX_ENABLED=OFF`
   - `OCIO_VULKAN_ENABLED=OFF`
   - `OCIO_INSTALL_EXT_PACKAGES=MISSING`
+- Extra behavior:
+  - If `OpenColorIO::OpenColorIO` is missing, creates an alias from `OpenColorIO`.
 
 ---
 
@@ -336,6 +338,9 @@ applied per component, plus patches and extra behavior.
   - `USE_MPI=OFF`
   - `HDF5_FOUND=OFF`
   - `HDF5_IS_PARALLEL=OFF`
+- Extra behavior: 
+  - If BUILD_SHARED_LIBS: If `flann::flann_cpp` is missing, creates an alias from `flann_cpp`.
+  - If BUILD_STATIC_LIBS: If `flann::flann_cpp_s` is missing, creates an alias from `flann_cpp_s`.
 
 ---
 
