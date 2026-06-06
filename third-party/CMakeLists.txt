@@ -277,7 +277,9 @@ alicevision_ensure_dependency(Expat
 #
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(libdeflate)
+alicevision_ensure_dependency(libdeflate
+    TRANSITIVE_ONLY
+)
 
 # =============================================================================
 # openjph
@@ -297,7 +299,9 @@ alicevision_ensure_dependency(libdeflate)
 #
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(openjph)
+alicevision_ensure_dependency(openjph
+    TRANSITIVE_ONLY
+)
 
 # =============================================================================
 # Imath
@@ -307,6 +311,7 @@ alicevision_ensure_dependency(openjph)
 # =============================================================================
 alicevision_ensure_dependency(Imath
     VERSION 3.1
+    TRANSITIVE_ONLY
 )
 
 # =============================================================================
@@ -315,7 +320,9 @@ alicevision_ensure_dependency(Imath
 #
 # Dependencies: None
 # =============================================================================
-alicevision_ensure_dependency(TBB)
+alicevision_ensure_dependency(TBB
+    TRANSITIVE_ONLY
+)
 
 # =============================================================================
 # OpenEXR
@@ -325,6 +332,39 @@ alicevision_ensure_dependency(TBB)
 # =============================================================================
 alicevision_ensure_dependency(OpenEXR
     VERSION 3
+)
+
+# =============================================================================
+# pystring
+# (Version compatibility: Unknown, suspecting SameMajorVersion)
+#
+# Dependencies: None
+# =============================================================================
+alicevision_ensure_dependency(pystring
+    VERSION 1.1.3
+    TRANSITIVE_ONLY
+)
+
+# =============================================================================
+# yaml-cpp
+# (Version compatibility: AnyNewerVersion)
+#
+# Dependencies: None
+# =============================================================================
+alicevision_ensure_dependency(yaml-cpp
+    VERSION 0.8.0
+    TRANSITIVE_ONLY
+)
+
+# =============================================================================
+# minizip-ng
+# (Version compatibility: SameMajorVersion)
+#
+# Dependencies: None
+# =============================================================================
+alicevision_ensure_dependency(minizip-ng
+    VERSION 4.0.0
+    TRANSITIVE_ONLY
 )
 
 # =============================================================================
@@ -339,6 +379,7 @@ alicevision_ensure_dependency(OpenEXR
 # =============================================================================
 alicevision_ensure_dependency(OpenColorIO
     VERSION 2.3
+    TRANSITIVE_ONLY
 )
 
 # =============================================================================
@@ -365,7 +406,8 @@ alicevision_ensure_dependency(Eigen
 # Dependencies: None
 # =============================================================================
 alicevision_ensure_dependency(LZ4
-  ALLOW_CMAKE_MODULE
+    ALLOW_CMAKE_MODULE
+    TRANSITIVE_ONLY
 )
 
 # =============================================================================
@@ -375,7 +417,7 @@ alicevision_ensure_dependency(LZ4
 # Dependencies: LZ4 (OpenMP, CUDA)
 # =============================================================================
 alicevision_ensure_dependency(flann
-  VERSION 1.8.4...<2
+    VERSION 1.8.4
 )
 
 # =============================================================================
@@ -393,10 +435,12 @@ alicevision_ensure_dependency(flann
 alicevision_ensure_dependency(BLAS
     NO_CONFIG
     ALLOW_CMAKE_MODULE
+    TRANSITIVE_ONLY
 )
 alicevision_ensure_dependency(LAPACK
     NO_CONFIG
     ALLOW_CMAKE_MODULE
+    TRANSITIVE_ONLY
 )
 
 # =============================================================================
@@ -420,6 +464,7 @@ if(ALICEVISION_ALLOW_GPL AND (NOT APPLE OR ALICEVISION_SUITESPARSE_ON_APPLE))
         COLAMD
         CHOLMOD
         SPQR
+      TRANSITIVE_ONLY
   )
 endif()
 
@@ -430,8 +475,8 @@ endif()
 # Dependencies: Eigen, BLAS/LAPACK, (SuiteSparse/Accelerate.framework)
 # =============================================================================
 alicevision_ensure_dependency(Ceres
-  VERSION 2
-  LEGACY_SUPPORT_VERSION 1.10.0
+    VERSION 2
+    LEGACY_SUPPORT_VERSION 1.10.0
 )
 
 # =============================================================================

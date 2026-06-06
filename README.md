@@ -16,6 +16,9 @@ It currently is in a very early state and does not even contain the actual Alice
 - [x] Imath
 - [x] oneTBB/TBB
 - [x] OpenEXR
+- [x] yaml-cpp
+- [x] pystring
+- [x] minizip-ng
 - [x] OpenColorIO
 - [x] Eigen
 - [x] LZ4

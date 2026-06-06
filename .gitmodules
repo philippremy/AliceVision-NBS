@@ -55,3 +55,15 @@
 [submodule "third-party/ceres-solver"]
 	path = third-party/ceres-solver
 	url = https://ceres-solver.googlesource.com/ceres-solver
+[submodule "third-party/yaml-cpp"]
+	path = third-party/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "third-party/pystring"]
+	path = third-party/pystring
+	url = https://github.com/imageworks/pystring
+[submodule "third-party/minizip-ng"]
+	path = third-party/minizip-ng
+	url = https://github.com/zlib-ng/minizip-ng.git
+[submodule "tools/vcpkg"]
+	path = tools/vcpkg
+	url = https://github.com/microsoft/vcpkg.git

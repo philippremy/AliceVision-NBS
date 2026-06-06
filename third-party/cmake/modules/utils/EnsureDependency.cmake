@@ -171,12 +171,13 @@ endmacro()
 #   [COMPONENTS <COMPONENTS...>]
 #   [ALLOW_CMAKE_MODULE]
 #   [LEGACY_SUPPORT_VERSION <VERSION>]
+#   [TRANSITIVE_ONLY]
 # )
 # =============================================================================
 function(alicevision_ensure_dependency AV_DEP_NAME)
 
   cmake_parse_arguments(AV_DEP
-      "ALLOW_CMAKE_MODULE;NO_CONFIG"
+      "ALLOW_CMAKE_MODULE;NO_CONFIG;TRANSITIVE_ONLY"
       "LEGACY_SUPPORT_VERSION;VERSION"
       "COMPONENTS;ALTERNATIVE_PACKAGE_NAMES"
       ${ARGN}
@@ -185,6 +186,16 @@ function(alicevision_ensure_dependency AV_DEP_NAME)
   # There must at least be a dependency name
   if(NOT DEFINED AV_DEP_NAME OR AV_DEP_NAME STREQUAL "")
     message(FATAL_ERROR "Must provide a dependency name to alicevision_ensure_dependency!")
+  endif()
+
+  # Handle TRANSITIVE_ONLY dependencies differently when being in a vcpkg build
+  # because they are ensured to be existent by vcpkg itself, so we can just
+  # skip them early
+  # We detect vcpkg by the variable VCPKG_TOOLCHAIN, which it internally sets
+  # when the CMAKE_TOOLCHAIN_FILE is loaded.
+  if(AV_DEP_TRANSITIVE_ONLY AND VCPKG_TOOLCHAIN)
+    message(TRACE "[alicevision_ensure_dependency] Skipping indirect dependency ${AV_DEP_NAME} (vcpkg build).")
+    return()
   endif()
 
   # We must have a special handling for BLAS and LAPACK on macOS, if the build
