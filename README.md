@@ -26,6 +26,10 @@ It currently is in a very early state and does not even contain the actual Alice
 - [x] OpenBLAS
 - [x] SuiteSparse (if ALICEVISION_ALLOW_GPL)
 - [x] Ceres
+- [x] Xerces-C
+- [x] libE57Format
+- [x] assimp
+- [x] Alembic
 
 [^1]: "Handled correctly" meaning that the build system is able to pick externally provided packages from any package manager provided environment supported by CMake and to build it as an embedded dependency in a cross-platform way. The build is facilitated by CMake's FetchContent functionality, embedded in customized wrappers. This allows for more consistent builds than with ExternalProject and does not require CMake to run twice, simplifiying option handling considerably.
 

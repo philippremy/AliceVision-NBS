@@ -26,24 +26,28 @@ else()
   option(ALICEVISION_USE_C_LAPACK OFF "Whether to use the f2c'ed (C) version of LAPACK when building an embedded LAPACK")
 endif()
 
-option(ALICEVISION_FORCE_BUILD_zlib OFF "Force build zlib")
-option(ALICEVISION_FORCE_BUILD_Boost OFF "Force build Boost")
-option(ALICEVISION_FORCE_BUILD_OpenMP OFF "Force build OpenMP")
-option(ALICEVISION_FORCE_BUILD_nanoflann OFF "Force build nanoflann")
-option(ALICEVISION_FORCE_BUILD_Expat OFF "Force build Expat")
-option(ALICEVISION_FORCE_BUILD_libdeflate OFF "Force build libdeflate")
-option(ALICEVISION_FORCE_BUILD_openjph OFF "Force build openjph")
-option(ALICEVISION_FORCE_BUILD_Imath OFF "Force build Imath")
-option(ALICEVISION_FORCE_BUILD_TBB OFF "Force build TBB")
-option(ALICEVISION_FORCE_BUILD_OpenEXR OFF "Force build OpenEXR")
-option(ALICEVISION_FORCE_BUILD_OpenColorIO OFF "Force build OpenColorIO")
-option(ALICEVISION_FORCE_BUILD_Eigen OFF "Force build Eigen")
-option(ALICEVISION_FORCE_BUILD_LZ4 OFF "Force build LZ4")
-option(ALICEVISION_FORCE_BUILD_flann OFF "Force build flann")
-option(ALICEVISION_FORCE_BUILD_BLAS OFF "Force build BLAS")
-option(ALICEVISION_FORCE_BUILD_LAPACK OFF "Force build LAPACK")
-option(ALICEVISION_FORCE_BUILD_SuiteSparse OFF "Force build LAPACK")
-option(ALICEVISION_FORCE_BUILD_Ceres OFF "Force build LAPACK")
+option(ALICEVISION_FORCE_BUILD_zlib "Force build zlib" OFF)
+option(ALICEVISION_FORCE_BUILD_Boost "Force build Boost" OFF)
+option(ALICEVISION_FORCE_BUILD_OpenMP "Force build OpenMP" OFF)
+option(ALICEVISION_FORCE_BUILD_nanoflann "Force build nanoflann" OFF)
+option(ALICEVISION_FORCE_BUILD_Expat "Force build Expat" OFF)
+option(ALICEVISION_FORCE_BUILD_libdeflate "Force build libdeflate" OFF)
+option(ALICEVISION_FORCE_BUILD_openjph "Force build openjph" OFF)
+option(ALICEVISION_FORCE_BUILD_Imath "Force build Imath" OFF)
+option(ALICEVISION_FORCE_BUILD_TBB "Force build TBB" OFF)
+option(ALICEVISION_FORCE_BUILD_OpenEXR "Force build OpenEXR" OFF)
+option(ALICEVISION_FORCE_BUILD_OpenColorIO "Force build OpenColorIO" OFF)
+option(ALICEVISION_FORCE_BUILD_Eigen "Force build Eigen" OFF)
+option(ALICEVISION_FORCE_BUILD_LZ4 "Force build LZ4" OFF)
+option(ALICEVISION_FORCE_BUILD_flann "Force build flann" OFF)
+option(ALICEVISION_FORCE_BUILD_BLAS "Force build BLAS" OFF)
+option(ALICEVISION_FORCE_BUILD_LAPACK "Force build LAPACK" OFF)
+option(ALICEVISION_FORCE_BUILD_SuiteSparse "Force build SuiteSparse" OFF)
+option(ALICEVISION_FORCE_BUILD_Ceres "Force build Ceres" OFF)
+option(ALICEVISION_FORCE_BUILD_XercesC "Force build XercesC" OFF)
+option(ALICEVISION_FORCE_BUILD_E57Format "Force build E57Format" OFF)
+option(ALICEVISION_FORCE_BUILD_assimp "Force build assimp" OFF)
+option(ALICEVISION_FORCE_BUILD_Alembic "Force build Alembic" OFF)
 
 # Default to shared libraries
 if(NOT DEFINED BUILD_SHARED_LIBS)
@@ -126,7 +130,7 @@ endif()
 add_subdirectory(third-party EXCLUDE_FROM_ALL)
 
 # Make an SBOM library
-if(BUILD_SHARED_LIBS)
+if(BUILD_SHARED_LIBS AND NOT VCPKG_TOOLCHAIN)
 
   add_library(AliceVision_ALL_DEPS SHARED
     stub.cpp
@@ -172,7 +176,7 @@ if(BUILD_SHARED_LIBS)
         Ceres::ceres
   )
 
-elseif(BUILD_STATIC_LIBS)
+elseif(BUILD_STATIC_LIBS AND NOT VCPKG_TOOLCHAIN)
 
   add_library(AliceVision_ALL_DEPS SHARED
       stub.cpp
@@ -224,32 +228,3 @@ elseif(BUILD_STATIC_LIBS)
   )
 
 endif()
-
-
-set(AV_INPUT_FILE $<TARGET_FILE:AliceVision_ALL_DEPS>)
-install(CODE "
-message(STATUS \"Gathering runtime dependencies required by ${AV_INPUT_FILE}...\")
-
-file(GET_RUNTIME_DEPENDENCIES
-    RESOLVED_DEPENDENCIES_VAR RESOLVED
-    UNRESOLVED_DEPENDENCIES_VAR UNRESOLVED
-    LIBRARIES ${AV_INPUT_FILE}
-)
-
-message(STATUS \"### Report for ${AV_INPUT_FILE} ###\")
-message(STATUS \"\")
-
-foreach(RESOLVED_LIB IN LISTS RESOLVED)
-  message(STATUS \"  Resolved: \${RESOLVED_LIB}\")
-endforeach()
-
-message(STATUS \"\")
-
-foreach(UNRESOLVED_LIB IN LISTS UNRESOLVED)
-  message(STATUS \"  Unresolved: \${UNRESOLVED_LIB}\")
-endforeach()
-
-message(STATUS \"\")
-
-message(STATUS \"### End report for \${AV_INPUT_FILE} ###\")
-")

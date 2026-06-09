@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6c977350..1cb7cfaf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -321,13 +321,4 @@ info_cfg_option(USE_TESTS)
+ info_cfg_option(ALEMBIC_SHARED_LIBS)
+ info_cfg_option(ALEMBIC_DEBUG_WARNINGS_AS_ERRORS)
+ info_cfg_option(DOCS_PATH)
+-MESSAGE("${_config_msg}")
+-
+-#-******************************************************************************
+-# PACKAGING (place at the end)
+-#-******************************************************************************
+-set(CPACK_PACKAGE_CONTACT "Lucas Miller")
+-# The following is distribution specific but leaving it here as an example for
+-# the future (the example is for Ubuntu 22.04)
+-# set(CPACK_DEBIAN_PACKAGE_DEPENDS "libimath-3-1-29")
+-include(CPack)
++MESSAGE("${_config_msg}")
+\ No newline at end of file
+diff --git a/lib/Alembic/CMakeLists.txt b/lib/Alembic/CMakeLists.txt
+index 8cb8ddb9..5c45e67b 100644
+--- a/lib/Alembic/CMakeLists.txt
++++ b/lib/Alembic/CMakeLists.txt
+@@ -108,14 +108,6 @@ WRITE_BASIC_PACKAGE_VERSION_FILE(
+     AnyNewerVersion
+     )
+ 
+-EXPORT(TARGETS
+-    Alembic
+-    FILE
+-    "${CMAKE_CURRENT_BINARY_DIR}/${alembic_targets_file}"
+-    NAMESPACE
+-    Alembic::
+-    )
+-
+ INSTALL(FILES
+     "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfig.cmake"
+     "${CMAKE_CURRENT_BINARY_DIR}/AlembicConfigVersion.cmake"

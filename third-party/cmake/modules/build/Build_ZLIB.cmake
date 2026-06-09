@@ -3,6 +3,8 @@
 #
 # Special cases considered:
 # - Create ZLIB::ZLIB target if it does not exist
+# - Set ZLIB_INCLUDE_DIR (assimp requires this)
+# - Set ZLIB_LIBRARIES (assimp requires this)
 # =============================================================================
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
@@ -41,3 +43,15 @@ if(NOT TARGET ZLIB::ZLIB)
     message(FATAL_ERROR "Target ZLIB::ZLIB is not defined after configuring ZLIB, but ZLIB::ZLIBSTATIC is not available as well!")
   endif()
 endif()
+
+# Set ZLIB_LIBRARIES and ZLIB_INCLUDE_DIR
+set(ZLIB_LIBRARIES ZLIB::ZLIB CACHE STRING "The libraries to link against for zlib" FORCE)
+get_target_property(zlib_include_dir ZLIB::ZLIB INCLUDE_DIRECTORIES)
+# These might be INTERFACE_INCLUDE_DIRECTORIES (see above)
+if(NOT zlib_include_dir)
+  get_target_property(zlib_include_dir ZLIB::ZLIB INTERFACE_INCLUDE_DIRECTORIES)
+  if(NOT zlib_include_dir)
+  message(FATAL_ERRRO "[Build_ZLIB] Unable to determine include directories for ZLIB::ZLIB!")
+  endif()
+endif()
+  set(ZLIB_INCLUDE_DIR ${zlib_include_dir} CACHE STRING "The directories to include for zlib" FORCE)

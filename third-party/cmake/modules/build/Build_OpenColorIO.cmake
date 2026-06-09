@@ -28,7 +28,7 @@ alicevision_integrate_dependency(OpenColorIO
       "set(OCIO_USE_OIIO_FOR_APPS OFF)"
       "set(OCIO_DIRECTX_ENABLED OFF)"
       "set(OCIO_VULKAN_ENABLED OFF)"
-      "set(OCIO_INSTALL_EXT_PACKAGES MISSING)"
+      "set(OCIO_INSTALL_EXT_PACKAGES NONE)"
 )
 
 if(NOT TARGET OpenColorIO::OpenColorIO)

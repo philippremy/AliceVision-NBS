@@ -188,6 +188,19 @@ endif()
 set(CPack_CMake_INCLUDED ON)
 
 # =============================================================================
+# Threads
+# (Version compatibility: AnyNewerVersion)
+#
+# NOTE:
+# This is required by several dependencies, so we find it early explicitly, but
+# this cannot be built from source. Either the system supports threads or it
+# does not.
+#
+# Dependencies: None
+# =============================================================================
+find_package(Threads REQUIRED QUIET)
+
+# =============================================================================
 # zlib
 # (Version compatibility: AnyNewerVersion)
 #
@@ -210,7 +223,7 @@ alicevision_ensure_dependency(ZLIB
 # Dependencies: None
 # =============================================================================
 alicevision_ensure_dependency(Boost
-    VERSION 1.74
+    VERSION 1.74.0
     COMPONENTS
       atomic
       container
@@ -310,7 +323,7 @@ alicevision_ensure_dependency(openjph
 # Dependencies: None
 # =============================================================================
 alicevision_ensure_dependency(Imath
-    VERSION 3.1
+    VERSION 3.1.0
     TRANSITIVE_ONLY
 )
 
@@ -331,7 +344,7 @@ alicevision_ensure_dependency(TBB
 # Dependencies: Imath, Threads (libdeflate, openjph, TBB)
 # =============================================================================
 alicevision_ensure_dependency(OpenEXR
-    VERSION 3
+    VERSION 3.0.0
 )
 
 # =============================================================================
@@ -378,7 +391,7 @@ alicevision_ensure_dependency(minizip-ng
 # Dependencies: Imath, zlib, minizip-ng, pystring, yaml-cpp, Expat
 # =============================================================================
 alicevision_ensure_dependency(OpenColorIO
-    VERSION 2.3
+    VERSION 2.3.0
     TRANSITIVE_ONLY
 )
 
@@ -475,8 +488,50 @@ endif()
 # Dependencies: Eigen, BLAS/LAPACK, (SuiteSparse/Accelerate.framework)
 # =============================================================================
 alicevision_ensure_dependency(Ceres
-    VERSION 2
+    VERSION 2.0.0
     LEGACY_SUPPORT_VERSION 1.10.0
+)
+
+# =============================================================================
+# Xerces-C
+# (Version compatibility: SameMajorVersion)
+#
+# Dependencies: Threads
+# =============================================================================
+alicevision_ensure_dependency(XercesC
+    VERSION 3.2.0
+    TRANSITIVE_ONLY
+)
+
+# =============================================================================
+# libE57Format
+# (Version compatibility: SameMajorVersion)
+#
+# Dependencies: Threads, XercesC
+# =============================================================================
+alicevision_ensure_dependency(E57Format
+    VERSION 3.0.0
+)
+
+# =============================================================================
+# Assimp
+# (Version compatibility: SameMajorVersion)
+#
+# Dependencies: ZLIB
+# =============================================================================
+alicevision_ensure_dependency(assimp
+    VERSION 6
+    LEGACY_SUPPORT_VERSION 5
+)
+
+# =============================================================================
+# Alembic
+# (Version compatibility: AnyNewerVersion)
+#
+# Dependencies: Threads, Imath
+# =============================================================================
+alicevision_ensure_dependency(Alembic
+    VERSION 1.7.0
 )
 
 # =============================================================================

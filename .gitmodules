@@ -67,3 +67,12 @@
 [submodule "tools/vcpkg"]
 	path = tools/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "third-party/xerces-c"]
+	path = third-party/xerces-c
+	url = https://github.com/apache/xerces-c.git
+[submodule "third-party/assimp"]
+	path = third-party/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "third-party/alembic"]
+	path = third-party/alembic
+	url = https://github.com/alembic/alembic
