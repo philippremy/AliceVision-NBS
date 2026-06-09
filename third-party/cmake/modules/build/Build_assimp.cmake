@@ -8,6 +8,8 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
 
 alicevision_integrate_dependency(assimp
+    PATCH_STEP
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/assimp-minizipCompat.patch"
     CMAKE_EVAL_CODE
       "set(ASSIMP_HUNTER_ENABLED OFF)"
       "set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})"

@@ -1,16 +1,3 @@
-diff --git a/share/cmake/modules/install/InstallDirectX-Headers.cmake b/share/cmake/modules/install/InstallDirectX-Headers.cmake
-index 69132f41..5cec7d80 100644
---- a/share/cmake/modules/install/InstallDirectX-Headers.cmake
-+++ b/share/cmake/modules/install/InstallDirectX-Headers.cmake
-@@ -14,7 +14,7 @@ else()
-     set(DirectX-Headers_VERSION ${DirectX-Headers_FIND_VERSION})
- endif()
- 
--set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/ext/build/DirectX-Headers")
-+set(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}/ext/build/DirectX-Headers")
- set(DIRECTX_HEADERS_BUILD_TEST OFF CACHE BOOL "" FORCE)
- 
- FetchContent_Declare(DirectX-Headers
 diff --git a/share/cmake/modules/install/Installsse2neon.cmake b/share/cmake/modules/install/Installsse2neon.cmake
 index ced4ae13..cd51a6f7 100644
 --- a/share/cmake/modules/install/Installsse2neon.cmake

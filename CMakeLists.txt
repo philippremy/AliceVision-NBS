@@ -48,6 +48,7 @@ option(ALICEVISION_FORCE_BUILD_XercesC "Force build XercesC" OFF)
 option(ALICEVISION_FORCE_BUILD_E57Format "Force build E57Format" OFF)
 option(ALICEVISION_FORCE_BUILD_assimp "Force build assimp" OFF)
 option(ALICEVISION_FORCE_BUILD_Alembic "Force build Alembic" OFF)
+option(ALICEVISION_FORCE_BUILD_Geogram "Force build Geogram" OFF)
 
 # Default to shared libraries
 if(NOT DEFINED BUILD_SHARED_LIBS)
@@ -161,6 +162,9 @@ if(BUILD_SHARED_LIBS AND NOT VCPKG_TOOLCHAIN)
         Imath::Imath
         TBB::tbb
         OpenEXR::OpenEXR
+        pystring::pystring
+        yaml-cpp::yaml-cpp
+        MINIZIP::minizip-ng
         OpenColorIO::OpenColorIO
         Eigen3::Eigen
         lz4::lz4
@@ -174,6 +178,11 @@ if(BUILD_SHARED_LIBS AND NOT VCPKG_TOOLCHAIN)
         $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::COLAMD>
         $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::SPQR>
         Ceres::ceres
+        XercesC::XercesC
+        E57Format::E57Format
+        assimp::assimp
+        Alembic::Alembic
+        Geogram::geogram
   )
 
 elseif(BUILD_STATIC_LIBS AND NOT VCPKG_TOOLCHAIN)
@@ -212,6 +221,9 @@ elseif(BUILD_STATIC_LIBS AND NOT VCPKG_TOOLCHAIN)
       Imath::Imath
       TBB::tbb
       OpenEXR::OpenEXR
+      pystring::pystring
+      yaml-cpp::yaml-cpp
+      MINIZIP::minizip-ng
       OpenColorIO::OpenColorIO
       Eigen3::Eigen
       lz4::lz4
@@ -225,6 +237,11 @@ elseif(BUILD_STATIC_LIBS AND NOT VCPKG_TOOLCHAIN)
       $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::COLAMD_static>
       $<$<BOOL:ALICEVISION_ALLOW_GPL>:SuiteSparse::SPQR_static>
       Ceres::ceres
+      XercesC::XercesC
+      E57Format::E57Format
+      assimp::assimp
+      Alembic::Alembic
+      Geogram::geogram
   )
 
 endif()

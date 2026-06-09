@@ -1,0 +1,55 @@
+diff --git a/code/CMakeLists.txt b/code/CMakeLists.txt
+index b7b08de3b..1d57bfc58 100644
+--- a/code/CMakeLists.txt
++++ b/code/CMakeLists.txt
+@@ -1171,7 +1171,7 @@ ENDIF()
+ IF(ASSIMP_HUNTER_ENABLED)
+   hunter_add_package(minizip)
+   find_package(minizip CONFIG REQUIRED)
+-ELSE()
++ELSEIF(NOT TARGET MINIZIP::minizip-ng)
+   SET( unzip_SRCS
+     ../contrib/unzip/crypt.h
+     ../contrib/unzip/ioapi.c
+@@ -1353,7 +1353,7 @@ SET( assimp_src
+   ${ASSIMP_EXPORTER_SRCS}
+ 
+   ${FBX_COMMON_SRCS}
+-  
++
+   # Third-party libraries
+   ${unzip_compile_SRCS}
+   ${Poly2Tri_SRCS}
+@@ -1393,6 +1393,10 @@ ENDIF()
+ ADD_LIBRARY( assimp ${assimp_src} )
+ ADD_LIBRARY(assimp::assimp ALIAS assimp)
+ 
++IF(TARGET MINIZIP::minizip-ng)
++  TARGET_LINK_LIBRARIES(assimp MINIZIP::minizip-ng)
++ENDIF()
++
+ # Add or remove dllexport tags depending on the library type.
+ IF (BUILD_SHARED_LIBS)
+   TARGET_COMPILE_DEFINITIONS(assimp PRIVATE ASSIMP_BUILD_DLL_EXPORT)
+diff --git a/contrib/zip/src/miniz.h b/contrib/zip/src/miniz.h
+index ad5850ce1..ad78685e8 100644
+--- a/contrib/zip/src/miniz.h
++++ b/contrib/zip/src/miniz.h
+@@ -1744,7 +1744,7 @@ MINIZ_EXPORT mz_bool mz_zip_writer_add_read_buf_callback(
+ /* level_and_flags - compression level (0-10, see MZ_BEST_SPEED,
+  * MZ_BEST_COMPRESSION, etc.) logically OR'd with zero or more mz_zip_flags, or
+  * just set to MZ_DEFAULT_COMPRESSION. */
+-MINIZ_EXPORT mz_bool mz_zip_writer_add_file(
++MINIZ_EXPORT static mz_bool mz_zip_writer_add_file(
+     mz_zip_archive *pZip, const char *pArchive_name, const char *pSrc_filename,
+     const void *pComment, mz_uint16 comment_size, mz_uint level_and_flags,
+     mz_uint32 ext_attributes);
+@@ -9207,7 +9207,7 @@ mz_bool mz_zip_writer_add_cfile(
+       user_extra_data_central_len);
+ }
+ 
+-mz_bool mz_zip_writer_add_file(mz_zip_archive *pZip, const char *pArchive_name,
++static mz_bool mz_zip_writer_add_file(mz_zip_archive *pZip, const char *pArchive_name,
+                                const char *pSrc_filename, const void *pComment,
+                                mz_uint16 comment_size, mz_uint level_and_flags,
+                                mz_uint32 ext_attributes) {

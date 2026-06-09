@@ -76,3 +76,6 @@
 [submodule "third-party/alembic"]
 	path = third-party/alembic
 	url = https://github.com/alembic/alembic
+[submodule "third-party/geogram"]
+	path = third-party/geogram
+	url = https://github.com/BrunoLevy/geogram.git

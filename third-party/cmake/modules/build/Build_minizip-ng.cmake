@@ -1,13 +1,17 @@
 # =============================================================================
 # Build_minizip-ng.cmake - Integrates an embedded minizip-ng into the project
 #
+# Special cases considered:
+# - Create target MINIZIP::minizip-ng if it does not exist
+# - Create target zip::zip if it does not exist (assimp drop-in for vendored
+# zip code which can cause duplicate symbols with minizip-ng)
 # =============================================================================
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
 
 alicevision_integrate_dependency(minizip-ng
     CMAKE_EVAL_CODE
-      "set(MZ_COMPAT OFF)"
+      "set(MZ_COMPAT ON)" # Assimp expects zip/unzip functions to be available
       "set(MZ_ZLIB ON)"
       "set(MZ_ZLIB_FLAVOR zlib)"
       "set(MZ_BZIP2 OFF)"
@@ -39,15 +43,11 @@ alicevision_integrate_dependency(minizip-ng
       endif()"
 )
 
-# Add ZLIB::ZLIB if in a static build
-if(NOT TARGET ZLIB::ZLIB)
-  if(TARGET ZLIB::ZLIBSTATIC)
-    add_library(__zlib_interface INTERFACE)
-    target_link_libraries(__zlib_interface INTERFACE ZLIB::ZLIBSTATIC)
-    get_target_property(zlib_static_inc_dirs ZLIB::ZLIBSTATIC INCLUDE_DIRECTORIES)
-    target_include_directories(__zlib_interface INTERFACE ${zlib_static_inc_dirs})
-    add_library(ZLIB::ZLIB ALIAS __zlib_interface)
-  else()
-    message(FATAL_ERROR "Target ZLIB::ZLIB is not defined after configuring ZLIB, but ZLIB::ZLIBSTATIC is not available as well!")
-  endif()
+# Create compatibility targets
+if(NOT TARGET MINIZIP::minizip-ng)
+  add_library(MINIZIP::minizip-ng ALIAS minizip)
+endif()
+
+if(NOT TARGET zip::zip)
+  add_library(zip::zip ALIAS minizip)
 endif()

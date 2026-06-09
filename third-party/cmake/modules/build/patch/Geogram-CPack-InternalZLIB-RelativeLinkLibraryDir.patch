@@ -1,0 +1,81 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 44540d69..5594e98e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -234,7 +234,4 @@ configure_file(
+ tools/make_package.pl.in
+ make_package.pl
+ @ONLY
+-)
+-
+-# This must always be last!
+-include(CPack)
++)
+\ No newline at end of file
+diff --git a/cmake/geogram.cmake b/cmake/geogram.cmake
+index b6fad01c..a2260bc0 100644
+--- a/cmake/geogram.cmake
++++ b/cmake/geogram.cmake
+@@ -154,7 +154,6 @@ set(RELATIVE_LIB_OUTPUT_DIR ${RELATIVE_OUTPUT_DIR}/lib/)
+ 
+ include_directories(${GEOGRAM_SOURCE_DIR}/src/lib)
+ include_directories(${GEOGRAM_SOURCE_DIR}/src/lib/geogram_gfx/third_party/)
+-link_directories(${GEOGRAM_SOURCE_DIR}/${RELATIVE_LIB_DIR})
+ 
+ 
+ if(GEOGRAM_WITH_VORPALINE)
+diff --git a/src/lib/geogram/CMakeLists.txt b/src/lib/geogram/CMakeLists.txt
+index 2346c2d8..e4769e79 100755
+--- a/src/lib/geogram/CMakeLists.txt
++++ b/src/lib/geogram/CMakeLists.txt
+@@ -50,6 +50,9 @@ include_directories(${PROJECT_BINARY_DIR}/src/lib)
+ 
+ add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
+ 
++find_package(ZLIB REQUIRED QUIET)
++target_link_libraries(geogram ZLIB::ZLIB)
++
+ target_compile_features(geogram PUBLIC cxx_std_17)
+ 
+ target_include_directories(geogram PRIVATE
+diff --git a/src/lib/geogram/basic/geofile.cpp b/src/lib/geogram/basic/geofile.cpp
+index b3875803..a1140a4a 100644
+--- a/src/lib/geogram/basic/geofile.cpp
++++ b/src/lib/geogram/basic/geofile.cpp
+@@ -187,7 +187,7 @@ namespace {
+ 	geo_assert(
+ 	    off >= -ssize_t(MAX_GZ_IO_SIZE) && off <= ssize_t(MAX_GZ_IO_SIZE)
+ 	);
+-	return ssize_t(gzseek(file, z_off_t(off), whence));
++	return ssize_t(gzseek(file, (z_off_t)(off), whence));
+     }
+ 
+ 
+diff --git a/src/lib/geogram/basic/geofile.h b/src/lib/geogram/basic/geofile.h
+index 070b0e4b..24f736d2 100644
+--- a/src/lib/geogram/basic/geofile.h
++++ b/src/lib/geogram/basic/geofile.h
+@@ -44,11 +44,7 @@
+ #include <geogram/basic/numeric.h>
+ #include <geogram/basic/memory.h>
+ #include <geogram/basic/string.h>
+-#ifdef GEOGRAM_USE_BUILTIN_DEPS
+-#include <geogram/third_party/zlib/zlib.h>
+-#else
+ #include <zlib.h>
+-#endif
+ 
+ #include <stdexcept>
+ #include <fstream>
+diff --git a/src/lib/geogram/third_party/CMakeLists.txt b/src/lib/geogram/third_party/CMakeLists.txt
+index 56e37429..c66923ba 100644
+--- a/src/lib/geogram/third_party/CMakeLists.txt
++++ b/src/lib/geogram/third_party/CMakeLists.txt
+@@ -62,7 +62,6 @@ aux_source_directories(SOURCES "Source Files"               .)
+ aux_source_directories(SOURCES "Source Files\\libMeshb"     libMeshb/sources)
+ aux_source_directories(SOURCES "Source Files\\rply"         rply)
+ aux_source_directories(SOURCES "Source Files\\shewchuk"     shewchuk)
+-aux_source_directories(SOURCES "Source Files\\zlib"         zlib)
+ aux_source_directories(SOURCES "Source Files\\PoissonRecon" PoissonRecon)
+ aux_source_directories(SOURCES "Source Files\\xatlas"       xatlas)
+ aux_source_directories(SOURCES "Source Files\\OpenNL"       OpenNL)

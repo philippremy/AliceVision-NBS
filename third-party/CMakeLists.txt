@@ -535,6 +535,24 @@ alicevision_ensure_dependency(Alembic
 )
 
 # =============================================================================
+# Geogram
+# (Version compatibility: Unknown, suspecting SameMajorVersion)
+#
+# NOTE:
+# We must allow CMake Find modules, because Geogram does not ship a Config file
+# but instead has a more or less generic wrapper to find itself in some known
+# locations. The module is modified to also extract the version number if
+# possible.
+# 
+# Dependencies: Threads, Imath
+# =============================================================================
+alicevision_ensure_dependency(Geogram
+    VERSION 1.8.8
+    LEGACY_SUPPORT_VERSION 1.7.5
+    ALLOW_CMAKE_MODULE
+)
+
+# =============================================================================
 # Fixup targets to be under out third-party folder in IDEs
 # =============================================================================
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/FixupTargetWarningFlags.cmake)

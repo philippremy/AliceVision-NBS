@@ -5,6 +5,7 @@
 # - Create ZLIB::ZLIB target if it does not exist
 # - Set ZLIB_INCLUDE_DIR (assimp requires this)
 # - Set ZLIB_LIBRARIES (assimp requires this)
+# - Set ZLIB_FOUND to TRUE (assimp requires this)
 # =============================================================================
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
@@ -54,4 +55,7 @@ if(NOT zlib_include_dir)
   message(FATAL_ERRRO "[Build_ZLIB] Unable to determine include directories for ZLIB::ZLIB!")
   endif()
 endif()
-  set(ZLIB_INCLUDE_DIR ${zlib_include_dir} CACHE STRING "The directories to include for zlib" FORCE)
+set(ZLIB_INCLUDE_DIR ${zlib_include_dir} CACHE STRING "The directories to include for zlib" FORCE)
+
+# Set ZLIB_FOUND
+set(ZLIB_FOUND TRUE CACHE BOOL "Whether ZLIB was found" FORCE)

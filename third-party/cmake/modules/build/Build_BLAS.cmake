@@ -141,7 +141,7 @@ else()
   alicevision_integrate_dependency(BLAS
       SUBMODULE_NAME "OpenBLAS"
       PATCH_STEP
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/OpenBLAS-CMakeBinaryDir-ArchiveOutputFolder.patch"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/OpenBLAS-CMakeBinaryDir-ArchiveAndLibraryOutputFolder-DarwinLinkerSysroot.patch"
       CMAKE_EVAL_CODE
         "set(INTERFACE64 OFF)"
         "set(BUILD_WITHOUT_LAPACK OFF)"

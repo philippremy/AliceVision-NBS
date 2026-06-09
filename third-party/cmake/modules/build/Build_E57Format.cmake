@@ -2,7 +2,7 @@
 # Build_E57Format.cmake - Integrates an embedded E57Format into the project
 #
 # Special cases considered:
-# - Currently none
+# - Create target E57Format::E57Format if it does not exist
 # =============================================================================
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/IntegrateDependency.cmake)
@@ -20,3 +20,7 @@ alicevision_integrate_dependency(E57Format
       "set(E57FORMAT_SANITIZE_UNDEFINED OFF)"
       "set(E57_GIT_SUBMODULE_UPDATE OFF)"
 )
+
+if(NOT TARGET E57Format::E57Format)
+  add_library(E57Format::E57Format ALIAS E57Format)
+endif()

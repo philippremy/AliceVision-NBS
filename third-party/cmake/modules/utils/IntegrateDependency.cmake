@@ -74,7 +74,7 @@ function(alicevision_integrate_dependency AV_DEP_NAME)
         -DPATCH_WORKDIR=${AV_DEP_SOURCE_DIR}
         -DPATCH_FILE=${AV_DEP_PATCH_STEP}
         -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
-        -DQUIET=OFF
+        -DQUIET=ON
         -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/ApplyGitPatchSafe.cmake
     )
     message(TRACE "[alicevision_integrate_dependency] Generated patch step args: ${AV_DEP_PATCH_STEP_FC_EXPANDED}")
