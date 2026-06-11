@@ -1,0 +1,70 @@
+#
+# AliceVision Continuous Integration Worflows
+# 
+# Copyright (c) 2026 Philipp Remy.
+# Licensed under MPL-2.0. See LICENSE.md for details.
+
+name: Continuous Integration for third-party dependencies
+
+on:
+   push:
+     branches:
+       - main
+
+jobs:
+   macos-apple-silicon-appleclang:
+     runs-on: macos-latest
+     strategy:
+       fail-fast: false
+       matrix:
+         toolset:
+           - name: AppleClang-17
+             c-compiler: "/usr/bin/clang"
+             cxx-compiler: "/usr/bin/clang++"
+           - name: LLVMClang-18
+             c-compiler: "clang"
+             cxx-compiler: "clang++"
+         generator: [ Ninja, Xcode ]
+         architecture:
+           - name: ARM64
+             osx-architectures: arm64
+           - name: x86_64
+             osx-architectures: x86_64
+           - name: Universal
+             osx-architectures: arm64;x86_64
+         librarytype: [ SHARED, STATIC ]
+     steps:
+        - name: Checkout AliceVision-NBS repository
+          uses: actions/checkout@v6
+          with:
+             fetch-depth: 1
+             submodules: true
+             
+        - name: Setup ccache
+          uses: hendrikmuhs/ccache-action@v1.2
+
+        - name: Prepare environment
+          run: |
+              echo "LLVM_BIN=$(brew --prefix llvm@18)/bin" >> $GITHUB_ENV
+          
+        - name: Build third-party dependencies with CMake
+          uses: threeal/cmake-action@v2.1.0
+          with:
+            generator: "${{ matrix.generator }}"
+            build-dir: "${{ github.workspace }}/${{ matrix.toolset.name }}-${{ matrix.generator }}-${{ matrix.architecture.name }}-${{ matrix.librarytype }}"
+            c-compiler: "${{ env.LLVM_BIN }}/${{ matrix.toolset.c-compiler }}"
+            cxx-compiler: "${{ env.LLVM_BIN }}/${{ matrix.toolset.cxx-compiler }}"
+            options: |
+                -DALICEVISION_BUILD_THIRD_PARTY=ON
+                -DALICEVISION_INSTALL_THIRD_PARTY=OFF
+                -DALICEVISION_ALLOW_SYSTEM_DEPENDENCIES=OFF
+                -DALICEVISION_LOG_THIRD_PARTY_CONFIGURE=ON
+                -DALICEVISION_NO_FORTRAN=OFF
+                -DALICEVISION_ALLOW_GPL=ON
+                -DALICEVISION_SUITESPARSE_ON_APPLE=ON
+                -DBUILD_SHARED_LIBS=${{ matrix.librarytype == 'SHARED' && 'ON' || 'OFF' }}
+                -DBUILD_STATIC_LIBS=${{ matrix.librarytype == 'STATIC' && 'ON' || 'OFF' }}
+                -DCMAKE_OSX_ARCHITECTURES='${{ matrix.architecture.osx-architectures }}'
+                -DCMAKE_C_COMPILER_LAUNCHER=ccache
+                -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            run-build: true
