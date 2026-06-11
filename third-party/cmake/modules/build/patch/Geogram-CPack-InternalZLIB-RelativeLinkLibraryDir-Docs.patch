@@ -1,17 +1,29 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 44540d69..5594e98e 100644
+index 44540d69..fb5eadd8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -234,7 +234,4 @@ configure_file(
- tools/make_package.pl.in
+@@ -153,14 +153,6 @@ add_subdirectory(src/examples)
+ add_subdirectory(tests)
+ endif()
+ 
+-add_subdirectory(doc)
+-
+-##############################################################################
+-# Cleanup from previous builds
+-
+-file(REMOVE ${CMAKE_BINARY_DIR}/doc/LICENSE.txt)
+-
+-
+ ##############################################################################
+ # Geogram installation
+ 
+@@ -235,6 +227,3 @@ tools/make_package.pl.in
  make_package.pl
  @ONLY
--)
+ )
 -
 -# This must always be last!
 -include(CPack)
-+)
-\ No newline at end of file
 diff --git a/cmake/geogram.cmake b/cmake/geogram.cmake
 index b6fad01c..a2260bc0 100644
 --- a/cmake/geogram.cmake

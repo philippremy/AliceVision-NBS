@@ -12,59 +12,175 @@ on:
        - main
 
 jobs:
-   macos-apple-silicon-appleclang:
-     runs-on: macos-latest
+   Darwin:
+     name: Darwin (${{ matrix.toolset.name }}, ${{ matrix.architecture.name }}, ${{ matrix.generator }}, ${{ matrix.librarytype }})
      strategy:
        fail-fast: false
        matrix:
          toolset:
-           - name: AppleClang-17
+           - name: Xcode
              c-compiler: "/usr/bin/clang"
              cxx-compiler: "/usr/bin/clang++"
-           - name: LLVMClang-18
+           - name: LLVM
              c-compiler: "clang"
              cxx-compiler: "clang++"
          generator: [ Ninja, Xcode ]
          architecture:
            - name: ARM64
              osx-architectures: arm64
+             os-image: macos-26
            - name: x86_64
              osx-architectures: x86_64
+             os-image: macos-26-intel
            - name: Universal
              osx-architectures: arm64;x86_64
+             os-image: macos-26
          librarytype: [ SHARED, STATIC ]
+     runs-on: ${{ matrix.architecture.os-image }}
      steps:
         - name: Checkout AliceVision-NBS repository
           uses: actions/checkout@v6
           with:
              fetch-depth: 1
-             submodules: true
+             submodules: false
              
         - name: Setup ccache
           uses: hendrikmuhs/ccache-action@v1.2
 
-        - name: Prepare environment
+        # This is only done for LLVMClang variants
+        # NOTE: The LLVM version number must match the version installed on the
+        #       GitHub runner. For macos-26(-intel), this is currently LLVM 20.
+        - name: Setup LLVM_BINARY_DIR in environment
+          if: matrix.toolset.name == 'LLVM'
           run: |
-              echo "LLVM_BIN=$(brew --prefix llvm@18)/bin" >> $GITHUB_ENV
+              echo "LLVM_BINARY_DIR=$(brew --prefix llvm@20)/bin" >> $GITHUB_ENV
           
         - name: Build third-party dependencies with CMake
           uses: threeal/cmake-action@v2.1.0
           with:
             generator: "${{ matrix.generator }}"
             build-dir: "${{ github.workspace }}/${{ matrix.toolset.name }}-${{ matrix.generator }}-${{ matrix.architecture.name }}-${{ matrix.librarytype }}"
-            c-compiler: "${{ env.LLVM_BIN }}/${{ matrix.toolset.c-compiler }}"
-            cxx-compiler: "${{ env.LLVM_BIN }}/${{ matrix.toolset.cxx-compiler }}"
+            c-compiler: "${{ env.LLVM_BINARY_DIR }}/${{ matrix.toolset.c-compiler }}"
+            cxx-compiler: "${{ env.LLVM_BINARY_DIR }}/${{ matrix.toolset.cxx-compiler }}"
             options: |
-                -DALICEVISION_BUILD_THIRD_PARTY=ON
-                -DALICEVISION_INSTALL_THIRD_PARTY=OFF
-                -DALICEVISION_ALLOW_SYSTEM_DEPENDENCIES=OFF
-                -DALICEVISION_LOG_THIRD_PARTY_CONFIGURE=ON
-                -DALICEVISION_NO_FORTRAN=OFF
-                -DALICEVISION_ALLOW_GPL=ON
-                -DALICEVISION_SUITESPARSE_ON_APPLE=ON
-                -DBUILD_SHARED_LIBS=${{ matrix.librarytype == 'SHARED' && 'ON' || 'OFF' }}
-                -DBUILD_STATIC_LIBS=${{ matrix.librarytype == 'STATIC' && 'ON' || 'OFF' }}
-                -DCMAKE_OSX_ARCHITECTURES='${{ matrix.architecture.osx-architectures }}'
-                -DCMAKE_C_COMPILER_LAUNCHER=ccache
-                -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+                ALICEVISION_BUILD_THIRD_PARTY=ON
+                ALICEVISION_INSTALL_THIRD_PARTY=OFF
+                ALICEVISION_ALLOW_SYSTEM_DEPENDENCIES=OFF
+                ALICEVISION_LOG_THIRD_PARTY_CONFIGURE=ON
+                ALICEVISION_NO_FORTRAN=OFF
+                ALICEVISION_ALLOW_GPL=ON
+                ALICEVISION_SUITESPARSE_ON_APPLE=ON
+                BUILD_SHARED_LIBS=${{ matrix.librarytype == 'SHARED' && 'ON' || 'OFF' }}
+                BUILD_STATIC_LIBS=${{ matrix.librarytype == 'STATIC' && 'ON' || 'OFF' }}
+                CMAKE_OSX_ARCHITECTURES='${{ matrix.architecture.osx-architectures }}'
+                CMAKE_C_COMPILER_LAUNCHER=ccache
+                CMAKE_CXX_COMPILER_LAUNCHER=ccache
+            run-build: true
+
+   Linux:
+     name: Linux (${{ matrix.toolset.name }}, ${{ matrix.architecture.name }}, ${{ matrix.generator }}, ${{ matrix.librarytype }})
+     strategy:
+       fail-fast: false
+       matrix:
+         toolset:
+           - name: LLVM
+             c-compiler: "clang"
+             cxx-compiler: "clang++"
+           - name: GNU
+             c-compiler: "gcc"
+             cxx-compiler: "g++"
+         generator: [ Ninja ]
+         architecture:
+           - name: x86_64
+             os-image: ubuntu-24.04
+           - name: arm64
+             os-image: ubuntu-24.04-arm
+         librarytype: [ SHARED, STATIC ]
+     runs-on: ${{ matrix.architecture.os-image }}
+     steps:
+        - name: Checkout AliceVision-NBS repository
+          uses: actions/checkout@v6
+          with:
+             fetch-depth: 1
+             submodules: false
+
+        - name: Setup ccache
+          uses: hendrikmuhs/ccache-action@v1.2
+
+        - name: Build third-party dependencies with CMake
+          uses: threeal/cmake-action@v2.1.0
+          with:
+            generator: "${{ matrix.generator }}"
+            build-dir: "${{ github.workspace }}/${{ matrix.toolset.name }}-${{ matrix.generator }}-${{ matrix.architecture.name }}-${{ matrix.librarytype }}"
+            c-compiler: "${{ matrix.toolset.c-compiler }}"
+            cxx-compiler: "${{ matrix.toolset.cxx-compiler }}"
+            options: |
+                ALICEVISION_BUILD_THIRD_PARTY=ON
+                ALICEVISION_INSTALL_THIRD_PARTY=OFF
+                ALICEVISION_ALLOW_SYSTEM_DEPENDENCIES=OFF
+                ALICEVISION_LOG_THIRD_PARTY_CONFIGURE=ON
+                ALICEVISION_NO_FORTRAN=OFF
+                ALICEVISION_ALLOW_GPL=ON
+                BUILD_SHARED_LIBS=${{ matrix.librarytype == 'SHARED' && 'ON' || 'OFF' }}
+                BUILD_STATIC_LIBS=${{ matrix.librarytype == 'STATIC' && 'ON' || 'OFF' }}
+                CMAKE_C_COMPILER_LAUNCHER=ccache
+                CMAKE_CXX_COMPILER_LAUNCHER=ccache
+            run-build: true
+
+   Windows:
+     name: Windows (${{ matrix.toolset.name }}, ${{ matrix.architecture.name }}, ${{ matrix.generator }}, ${{ matrix.librarytype }})
+     strategy:
+       fail-fast: false
+       matrix:
+         toolset:
+           - name: MSVC
+             c-compiler: "cl.exe"
+             cxx-compiler: "cl.exe"
+           - name: LLVM
+             c-compiler: "clang.exe"
+             cxx-compiler: "clang++.exe"
+         generator: [ Ninja ]
+         architecture:
+           - name: x86_64
+             os-image: windows-2025
+           - name: arm64
+             os-image: windows-11-arm
+         librarytype: [ SHARED, STATIC ]
+     runs-on: ${{ matrix.architecture.os-image }}
+     steps:
+        - name: Checkout AliceVision-NBS repository
+          uses: actions/checkout@v6
+          with:
+             fetch-depth: 1
+             submodules: false
+
+        # This is only done for MSVC variants, where the compiler (cl.exe) is
+        # not available on PATH by default.
+        - name: Setup MSVC environment
+          if: matrix.toolset.name == 'MSVC'
+          uses: ilammy/msvc-dev-cmd@v1
+          with:
+            arch: ${{ matrix.architecture.name == 'x86_64' && 'x64' || 'arm64' }}
+
+        - name: Setup ccache
+          uses: hendrikmuhs/ccache-action@v1.2
+
+        - name: Build third-party dependencies with CMake
+          uses: threeal/cmake-action@v2.1.0
+          with:
+            generator: "${{ matrix.generator }}"
+            build-dir: "${{ github.workspace }}/${{ matrix.toolset.name }}-${{ matrix.generator }}-${{ matrix.architecture.name }}-${{ matrix.librarytype }}"
+            c-compiler: "${{ matrix.toolset.c-compiler }}"
+            cxx-compiler: "${{ matrix.toolset.cxx-compiler }}"
+            options: |
+                ALICEVISION_BUILD_THIRD_PARTY=ON
+                ALICEVISION_INSTALL_THIRD_PARTY=OFF
+                ALICEVISION_ALLOW_SYSTEM_DEPENDENCIES=OFF
+                ALICEVISION_LOG_THIRD_PARTY_CONFIGURE=ON
+                ALICEVISION_NO_FORTRAN=ON
+                ALICEVISION_ALLOW_GPL=ON
+                BUILD_SHARED_LIBS=${{ matrix.librarytype == 'SHARED' && 'ON' || 'OFF' }}
+                BUILD_STATIC_LIBS=${{ matrix.librarytype == 'STATIC' && 'ON' || 'OFF' }}
+                CMAKE_C_COMPILER_LAUNCHER=ccache
+                CMAKE_CXX_COMPILER_LAUNCHER=ccache
             run-build: true

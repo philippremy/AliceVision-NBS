@@ -51,22 +51,45 @@ function(alicevision_integrate_dependency AV_DEP_NAME)
     list(APPEND AV_DEP_SOURCE_SUBDIR_ARGS "${AV_DEP_SOURCE_SUBDIR}")
   endif()
 
+  # We must have Git available
+  if(NOT Git_FOUND)
+    # We must temporarily push to allow for CMake to search in SYSTEM paths
+    set(AV_DEP_CURRENT_FIND_CMAKE_SYSTEM_PATH ${CMAKE_FIND_USE_CMAKE_SYSTEM_PATH})
+    set(AV_DEP_CURRENT_FIND_SYSTEM_ENVIRONMENT_PATH ${CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH})
+    set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH ON)
+    set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH ON)
+    find_package(Git REQUIRED QUIET)
+    set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH ${AV_DEP_CURRENT_FIND_CMAKE_SYSTEM_PATH})
+    set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH ${CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH})
+  endif()
+
+  # Ensure the submodule is checked-out
+  if(NOT EXISTS "${AV_DEP_SOURCE_DIR}/.git")
+    message(STATUS "Submodule for dependency ${AV_DEP_NAME} not checked-out at ${AV_DEP_SOURCE_DIR}, fetching now...")
+    # The path argument must be relative to the main Git repo, which we can
+    # calculate easily by just stripping PROJECT_SOURCE_DIR from the
+    # AV_DEP_SOURCE_DIR variable.
+    string(REPLACE "${PROJECT_SOURCE_DIR}/" "" AV_DEP_SUBMDOULE_RELATIVE_PATH "${AV_DEP_SOURCE_DIR}")
+
+    # This is quiet by default
+    if(NOT ALICEVISION_LOG_THIRD_PARTY_CONFIGURE)
+      set(AV_DEP_FETCH_ARGS OUTPUT_QUIET ERROR_QUIET)
+    else()
+      set(AV_DEP_FETCH_ARGS COMMAND_ECHO STDOUT)
+    endif()
+
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive --depth=1 -- ${AV_DEP_SUBMDOULE_RELATIVE_PATH}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      ${AV_DEP_FETCH_ARGS}
+      COMMAND_ERROR_IS_FATAL ANY
+    )
+    message(STATUS "Made submodule for dependency ${AV_DEP_NAME} available at ${AV_DEP_SOURCE_DIR}.")
+  endif()
+
   # Build the patch step arguments if required
   set(AV_DEP_PATCH_STEP_FC_EXPANDED)
   if(DEFINED AV_DEP_PATCH_STEP)
-
-    # We must have Git available
-    if(NOT Git_FOUND)
-      # We must temporarily push to allow for CMake to search in SYSTEM paths
-      set(AV_DEP_CURRENT_FIND_CMAKE_SYSTEM_PATH ${CMAKE_FIND_USE_CMAKE_SYSTEM_PATH})
-      set(AV_DEP_CURRENT_FIND_SYSTEM_ENVIRONMENT_PATH ${CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH})
-      set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH ON)
-      set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH ON)
-      find_package(Git REQUIRED QUIET)
-      set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH ${AV_DEP_CURRENT_FIND_CMAKE_SYSTEM_PATH})
-      set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH ${CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH})
-    endif()
-
     list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED "PATCH_COMMAND")
     list(APPEND AV_DEP_PATCH_STEP_FC_EXPANDED
       # Fixes the target_include_dir call for openjph to match an installed layout

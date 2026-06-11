@@ -22,7 +22,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/utils/SetVorpalinePlatform.cma
 alicevision_integrate_dependency(Geogram
     SUBMODULE_NAME "geogram"
     PATCH_STEP
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/Geogram-CPack-InternalZLIB-RelativeLinkLibraryDir.patch"
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/build/patch/Geogram-CPack-InternalZLIB-RelativeLinkLibraryDir-Docs.patch"
     CMAKE_EVAL_CODE
       "set(GEOGRAM_SUB_BUILD ON)"
       "set(GEOGRAM_WITH_GRAPHICS OFF)"
